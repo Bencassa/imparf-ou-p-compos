@@ -1,0 +1,3393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passé Composé vs Imparfait - Module FLE</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Merriweather', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .color-pc {
+            color: #3B82F6;
+            font-weight: 700;
+        }
+        
+        .color-imp {
+            color: #F97316;
+            font-weight: 700;
+        }
+        
+        .color-context {
+            color: #10B981;
+            font-weight: 700;
+        }
+        
+        .color-action {
+            color: #DC2626;
+            font-weight: 700;
+        }
+
+        .highlight-pc {
+            background-color: #DBEAFE;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #1E40AF;
+            font-weight: 600;
+        }
+
+        .highlight-imp {
+            background-color: #FFEDD5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #C2410C;
+            font-weight: 600;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes dance {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(-10deg); }
+            75% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .dancing-person {
+            animation: dance 0.6s ease-in-out infinite;
+            display: inline-block;
+            font-size: 4rem;
+        }
+
+        .slide-enter {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .badge-pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Mono', monospace;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .timeline {
+            position: relative;
+            background: linear-gradient(90deg, transparent 49%, #3B82F6 49%, #3B82F6 51%, transparent 51%);
+            height: 4px;
+            margin: 20px 0;
+        }
+
+        .timeline-point {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #DC2626;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #DC2626;
+        }
+
+        .clickable-word {
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .clickable-word:hover {
+            background-color: #FEF3C7;
+        }
+
+        .clickable-word.found-pc {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+            font-weight: 600;
+        }
+
+        .clickable-word.found-imp {
+            background-color: #FFEDD5;
+            color: #C2410C;
+            font-weight: 600;
+        }
+
+        /* Supprimer les flèches des input number */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ============================================
+        // DONNÉES DES EXERCICES
+        // ============================================
+
+        const QCM_EXERCISES_1 = [
+            {
+                id: 1,
+                question: "Quand il est arrivé, tout le monde _____ : c'était son anniversaire.",
+                options: ["a applaudi", "applaudissait"],
+                correct: "a applaudi",
+                explanation: "Action ponctuelle qui suit l'arrivée.",
+                hint: "Une réaction immédiate et ponctuelle"
+            },
+            {
+                id: 2,
+                question: "Quand il est arrivé, tout le monde _____ : c'était l'anniversaire de Nathalie.",
+                options: ["a applaudi", "applaudissait"],
+                correct: "applaudissait",
+                explanation: "L'action était déjà en cours avant son arrivée.",
+                hint: "L'action avait déjà commencé",
+                isMidpoint: true
+            },
+            {
+                id: 3,
+                question: "Hier, quand je suis rentrée, il _____ profondément.",
+                options: ["a dormi", "dormait"],
+                correct: "dormait",
+                explanation: "Il dormait déjà quand tu es rentrée.",
+                hint: "Le sommeil était déjà en cours"
+            },
+            {
+                id: 4,
+                question: "Quand il est allé à Paris, il _____ pendant tout le voyage.",
+                options: ["a dormi", "dormait"],
+                correct: "a dormi",
+                explanation: "Action avec un début et une fin claire pendant le voyage.",
+                hint: "Durée définie du voyage"
+            },
+            {
+                id: 5,
+                question: "Quand il a rencontré Nathalie, il _____ 20 ans.",
+                options: ["a eu", "avait"],
+                correct: "avait",
+                explanation: "État, caractéristique au moment de la rencontre.",
+                hint: "Un état, pas une action",
+                isMidpoint: true
+            },
+            {
+                id: 6,
+                question: "Quand il a rencontré Nathalie, il _____ le coup de foudre pour elle.",
+                options: ["a eu", "avait"],
+                correct: "a eu",
+                explanation: "Action soudaine et ponctuelle au moment de la rencontre.",
+                hint: "Un événement soudain"
+            },
+            {
+                id: 7,
+                question: "Quand je suis sortie, j'_____ Paul.",
+                options: ["ai rencontré", "rencontrais"],
+                correct: "ai rencontré",
+                explanation: "Action ponctuelle qui s'est produite au moment de sortir.",
+                hint: "Un événement ponctuel"
+            },
+            {
+                id: 8,
+                question: "Quand j'habitais dans ce quartier, je _____ toujours quelqu'un.",
+                options: ["ai rencontré", "rencontrais"],
+                correct: "rencontrais",
+                explanation: "Habitude répétée dans le passé.",
+                hint: "Une habitude",
+                isEndpoint: true
+            }
+        ];
+
+        const INPUT_EXERCISES_1 = [
+            {
+                id: 1,
+                questionBefore: "Avant, les gens ",
+                questionAfter: " à cheval. (voyager)",
+                answer: "voyageaient",
+                verb: "voyager",
+                hint: "Une habitude dans le passé → imparfait",
+                isMidpoint: false
+            },
+            {
+                id: 2,
+                questionBefore: "Un jour, on ",
+                questionAfter: " le moteur. (inventer)",
+                answer: "a inventé",
+                verb: "inventer",
+                hint: "Un événement ponctuel → passé composé",
+                isMidpoint: false
+            },
+            {
+                id: 3,
+                questionBefore: "Avant, Pierre ",
+                questionAfter: ". (fumer)",
+                answer: "fumait",
+                verb: "fumer",
+                hint: "Une habitude passée → imparfait",
+                isMidpoint: false
+            },
+            {
+                id: 4,
+                questionBefore: "Un de ses amis ",
+                questionAfter: " d'un cancer. (mourir)",
+                answer: "est mort",
+                verb: "mourir",
+                hint: "Un événement précis → passé composé",
+                isMidpoint: false
+            },
+            {
+                id: 5,
+                questionBefore: "Avant, Nicole ne ",
+                questionAfter: " pas attention à l'orthographe. (faire)",
+                answer: "faisait",
+                verb: "faire",
+                hint: "Une habitude → imparfait",
+                isMidpoint: true
+            },
+            {
+                id: 6,
+                questionBefore: "Le semestre dernier, elle ",
+                questionAfter: " à étudier le français. (commencer)",
+                answer: "a commencé",
+                verb: "commencer",
+                hint: "Début d'une action → passé composé",
+                isMidpoint: false
+            },
+            {
+                id: 7,
+                questionBefore: "Avant, je ",
+                questionAfter: " en France. (vivre)",
+                answer: "vivais",
+                verb: "vivre",
+                hint: "État dans le passé → imparfait",
+                isMidpoint: false
+            },
+            {
+                id: 8,
+                questionBefore: "À l'université, j'",
+                questionAfter: " mon mari. (connaître)",
+                answer: "ai connu",
+                verb: "connaître",
+                hint: "Rencontre ponctuelle → passé composé",
+                isEndpoint: true
+            }
+        ];
+
+        const INPUT_EXERCISES_2 = [
+            {
+                id: 1,
+                questionBefore: "Avant, vous ",
+                questionAfter: " en vacances en août. (partir)",
+                answer: "partiez",
+                verb: "partir",
+                hint: "Habitude passée → imparfait"
+            },
+            {
+                id: 2,
+                questionBefore: "Cette année, vous ",
+                questionAfter: " en juillet. (partir)",
+                answer: "êtes partis",
+                verb: "partir",
+                hint: "Action ponctuelle cette année → passé composé"
+            },
+            {
+                id: 3,
+                questionBefore: "Charlotte ",
+                questionAfter: " longtemps dans ce laboratoire. (travailler)",
+                answer: "a travaillé",
+                verb: "travailler",
+                hint: "Période définie → passé composé"
+            },
+            {
+                id: 4,
+                questionBefore: "Est-ce qu'elle y ",
+                questionAfter: " encore en février dernier ? (travailler)",
+                answer: "travaillait",
+                verb: "travailler",
+                hint: "État continu dans le passé → imparfait"
+            },
+            {
+                id: 5,
+                questionBefore: "Quand j'",
+                questionAfter: " petit, je regardais des dessins animés. (être)",
+                answer: "étais",
+                verb: "être",
+                hint: "État passé → imparfait",
+                isMidpoint: true
+            },
+            {
+                id: 6,
+                questionBefore: "Hier soir, j'",
+                questionAfter: " un dessin animé. (regarder)",
+                answer: "ai regardé",
+                verb: "regarder",
+                hint: "Action ponctuelle hier → passé composé"
+            },
+            {
+                id: 7,
+                questionBefore: "Il ",
+                questionAfter: " au moment où nous parlions. (arriver)",
+                answer: "est arrivé",
+                verb: "arriver",
+                hint: "Action ponctuelle → passé composé"
+            },
+            {
+                id: 8,
+                questionBefore: "Nous ",
+                questionAfter: " Mathilde devant les galeries. (rencontrer)",
+                answer: "avons rencontré",
+                verb: "rencontrer",
+                hint: "Rencontre ponctuelle → passé composé"
+            },
+            {
+                id: 9,
+                questionBefore: "Nous ",
+                questionAfter: " devant les vitrines quand nous l'avons vue. (passer)",
+                answer: "passions",
+                verb: "passer",
+                hint: "Action en cours → imparfait"
+            },
+            {
+                id: 10,
+                questionBefore: "L'été dernier, nous ",
+                questionAfter: " tous les volets. (repeindre)",
+                answer: "avons repeint",
+                verb: "repeindre",
+                hint: "Action complétée → passé composé",
+                isEndpoint: true
+            }
+        ];
+
+
+        const DRAG_DROP_EXERCISE = {
+            instructions: "Associe chaque situation au schéma temporel correct.",
+            pairs: [
+                {
+                    id: 1,
+                    situation: "Nous atterrissions (3 min) + nous avons entendu un bruit (2 sec)",
+                    schema: "Description + action courte",
+                    uniqueId: "schema-1"
+                },
+                {
+                    id: 2,
+                    situation: "Nous avons atterri (3 min) + nous entendions un bruit (30 min)",
+                    schema: "Action courte + description",
+                    uniqueId: "schema-2"
+                },
+                {
+                    id: 3,
+                    situation: "Nous avons atterri + nous avons entendu un bruit",
+                    schema: "Deux actions courtes simultanées",
+                    uniqueId: "schema-3"
+                },
+                {
+                    id: 4,
+                    situation: "Nous atterrissions + nous entendions un bruit",
+                    schema: "Deux descriptions simultanées",
+                    uniqueId: "schema-4"
+                }
+            ]
+        };
+
+        const FILL_IN_EXERCISE = [
+            {
+                id: 1,
+                sentence: "Quand je ___ (se lever), il ___ (faire) beau.",
+                answers: ["me suis levé", "faisait"],
+                verbs: ["se lever", "faire"]
+            },
+            {
+                id: 2,
+                sentence: "Je ___ (partir) au parc. J'___ (avoir) rendez-vous avec Lucie.",
+                answers: ["suis parti", "avais"],
+                verbs: ["partir", "avoir"]
+            },
+            {
+                id: 3,
+                sentence: "Quand je ___ (arriver), ils ___ (être) assis sur un banc.",
+                answers: ["suis arrivé", "étaient"],
+                verbs: ["arriver", "être"]
+            },
+            {
+                id: 4,
+                sentence: "Ils ___ (regarder) des enfants qui ___ (jouer).",
+                answers: ["regardaient", "jouaient"],
+                verbs: ["regarder", "jouer"]
+            },
+            {
+                id: 5,
+                sentence: "Nous ___ (aller) prendre un jus de fruit. Il y ___ (avoir) beaucoup de monde.",
+                answers: ["sommes allés", "avait"],
+                verbs: ["aller", "avoir"]
+            },
+            {
+                id: 6,
+                sentence: "La serveuse n'___ (être) pas rapide et nous ___ (attendre) longtemps.",
+                answers: ["était", "avons attendu"],
+                verbs: ["être", "attendre"]
+            }
+        ];
+
+        const TEXT_ANALYSIS = {
+            text: "Hier, je me suis levé tôt. Il faisait beau et les oiseaux chantaient. J'ai pris mon petit-déjeuner rapidement car j'avais rendez-vous. Quand je suis sorti, il y avait déjà beaucoup de monde dans la rue. Les gens se dépêchaient pour aller au travail. J'ai marché jusqu'au parc où Lucie m'attendait. Elle portait une robe rouge magnifique. Nous avons discuté pendant deux heures. C'était vraiment agréable.",
+            verbs: [
+                { verb: "me suis levé", infinitive: "se lever", type: "pc", index: 11 },
+                { verb: "faisait", infinitive: "faire", type: "imp", index: 19 },
+                { verb: "chantaient", infinitive: "chanter", type: "imp", index: 28 },
+                { verb: "ai pris", infinitive: "prendre", type: "pc", index: 32 },
+                { verb: "avais", infinitive: "avoir", type: "imp", index: 42 },
+                { verb: "suis sorti", infinitive: "sortir", type: "pc", index: 50 },
+                { verb: "avait", infinitive: "avoir", type: "imp", index: 57 },
+                { verb: "se dépêchaient", infinitive: "se dépêcher", type: "imp", index: 72 },
+                { verb: "ai marché", infinitive: "marcher", type: "pc", index: 84 },
+                { verb: "attendait", infinitive: "attendre", type: "imp", index: 95 },
+                { verb: "portait", infinitive: "porter", type: "imp", index: 100 },
+                { verb: "avons discuté", infinitive: "discuter", type: "pc", index: 110 },
+                { verb: "était", infinitive: "être", type: "imp", index: 119 }
+            ],
+            target: 13
+        };
+
+        const ENCOURAGEMENT_MESSAGES = [
+            "Bon début ! Mais attention, la suite est plus difficile...",
+            "Tu t'en sors bien jusqu'ici. Sauras-tu terminer sans faire d'erreur ?",
+            "Pas mal ! Mais garde ta concentration, le plus dur arrive...",
+            "C'est un bon score pour l'instant. Pourras-tu maintenir ce niveau ?",
+            "Bravo pour tes résultats jusqu'ici ! Prêt(e) à relever le défi jusqu'au bout ?",
+            "Tu progresses bien. Mais ne relâche pas ton effort maintenant !",
+            "Joli travail ! Montre-moi que tu peux aller jusqu'à la fin...",
+            "Ça se passe plutôt bien ! Attention à ne pas te relâcher dans la suite !"
+        ];
+
+        // ============================================
+        // COMPOSANT: CONFETTIS
+        // ============================================
+
+        const createConfetti = () => {
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        };
+
+        // ============================================
+        // COMPOSANT: HOME SCREEN
+        // ============================================
+
+        const HomeScreen = ({ onNavigate }) => {
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="card p-12 max-w-4xl w-full slide-enter">
+                        <h1 className="text-5xl font-bold text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                            ⏰ Passé Composé ou Imparfait
+                        </h1>
+                        <p className="text-xl text-center text-gray-600 mb-12">
+                            Maîtrise l'art de raconter une histoire au passé !
+                        </p>
+                        
+                        <div className="grid md:grid-cols-3 gap-6">
+                            <button
+                                onClick={() => onNavigate('tutorial')}
+                                className="btn-primary text-white p-8 rounded-xl font-bold text-xl hover:scale-105 transition-all"
+                            >
+                                <div className="text-4xl mb-4">🎓</div>
+                                Commencer le tutoriel
+                            </button>
+                            
+                            <button
+                                onClick={() => onNavigate('reference')}
+                                className="bg-gradient-to-br from-green-400 to-blue-500 text-white p-8 rounded-xl font-bold text-xl hover:scale-105 transition-all"
+                            >
+                                <div className="text-4xl mb-4">📊</div>
+                                Tableau de référence
+                            </button>
+                            
+                            <button
+                                onClick={() => onNavigate('practice')}
+                                className="bg-gradient-to-br from-orange-400 to-red-500 text-white p-8 rounded-xl font-bold text-xl hover:scale-105 transition-all"
+                            >
+                                <div className="text-4xl mb-4">💪</div>
+                                Un peu de pratique
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: INTERACTIVE TEXT IDENTIFICATION
+        // ============================================
+
+        const InteractiveTextIdentification = ({ onComplete, onPrevious }) => {
+            const [selectedVerbs, setSelectedVerbs] = useState({});
+            const [clickedWord, setClickedWord] = useState(null);
+            const [score, setScore] = useState(0);
+            const [showFeedback, setShowFeedback] = useState(null);
+
+            const text = "Quand je me suis levé, j'ai vu qu'il faisait beau. Il n'y avait pas un nuage dans le ciel. Cela m'a mis de bonne humeur : la journée commençait bien. J'ai pris mon petit-déjeuner puis je suis parti au parc du centre. J'avais rendez-vous là-bas avec Lucie. Quand je suis arrivé, j'ai vu qu'elle était accompagnée de Salim, un ami en commun. Ils étaient assis sur un banc et regardaient des enfants qui jouaient sur une balançoire. Ils m'ont vu et sont venus me saluer. Lucie portait une robe à fleurs et Salim, comme d'habitude, était tout en noir.";
+
+            const verbs = [
+                { id: 1, verb: "me suis levé", type: "pc", display: "me suis levé" },
+                { id: 2, verb: "ai vu", type: "pc", display: "ai vu" },
+                { id: 3, verb: "faisait", type: "imp", display: "faisait" },
+                { id: 4, verb: "avait", type: "imp", display: "avait" },
+                { id: 5, verb: "a mis", type: "pc", display: "a mis" },
+                { id: 6, verb: "commençait", type: "imp", display: "commençait" },
+                { id: 7, verb: "ai pris", type: "pc", display: "Ai pris" },
+                { id: 8, verb: "suis parti", type: "pc", display: "suis parti" },
+                { id: 9, verb: "avais", type: "imp", display: "avais" },
+                { id: 10, verb: "suis arrivé", type: "pc", display: "suis arrivé" },
+                { id: 11, verb: "ai vu", type: "pc", display: "ai vu" },
+                { id: 12, verb: "était", type: "imp", display: "était" },
+                { id: 13, verb: "étaient", type: "imp", display: "étaient" },
+                { id: 14, verb: "regardaient", type: "imp", display: "regardaient" },
+                { id: 15, verb: "jouaient", type: "imp", display: "jouaient" },
+                { id: 16, verb: "ont vu", type: "pc", display: "ont vu" },
+                { id: 17, verb: "sont venus", type: "pc", display: "sont venus" },
+                { id: 18, verb: "portait", type: "imp", display: "portait" },
+                { id: 19, verb: "était", type: "imp", display: "était" }
+            ];
+
+            // Créer un mapping des positions de verbes dans le texte
+            const verbPositions = {};
+            verbs.forEach(v => {
+                const regex = new RegExp(v.verb.replace(/'/g, "'"), 'gi');
+                let match;
+                let count = 0;
+                while ((match = regex.exec(text)) !== null) {
+                    const key = `${v.verb}-${count}`;
+                    verbPositions[match.index] = { ...v, key, startIndex: match.index, endIndex: match.index + match[0].length };
+                    count++;
+                }
+            });
+
+            const handleWordClick = (verbInfo) => {
+                if (!selectedVerbs[verbInfo.key]) {
+                    setClickedWord(verbInfo);
+                    setShowFeedback(null);
+                }
+            };
+
+            const handleChoice = (chosenType) => {
+                if (!clickedWord) return;
+
+                const isCorrect = chosenType === clickedWord.type;
+                
+                setSelectedVerbs({
+                    ...selectedVerbs,
+                    [clickedWord.key]: {
+                        type: chosenType,
+                        correct: isCorrect
+                    }
+                });
+
+                if (isCorrect) {
+                    setScore(score + 5);
+                    createConfetti();
+                    setShowFeedback({ type: 'success', message: '✅ Correct !' });
+                } else {
+                    setShowFeedback({ 
+                        type: 'error', 
+                        message: `❌ Incorrect. C'était ${clickedWord.type === 'pc' ? 'le passé composé' : "l'imparfait"}.` 
+                    });
+                }
+
+                setTimeout(() => {
+                    setClickedWord(null);
+                    setShowFeedback(null);
+                }, 1500);
+            };
+
+            const totalVerbs = verbs.length;
+            const identifiedVerbs = Object.keys(selectedVerbs).length;
+            const correctVerbs = Object.values(selectedVerbs).filter(v => v.correct).length;
+
+            // Créer le texte avec les verbes cliquables
+            const renderText = () => {
+                const elements = [];
+                let lastIndex = 0;
+
+                // Trier les positions de verbes
+                const sortedPositions = Object.entries(verbPositions)
+                    .map(([index, info]) => ({ index: parseInt(index), info }))
+                    .sort((a, b) => a.index - b.index);
+
+                sortedPositions.forEach(({ index, info }) => {
+                    // Ajouter le texte avant le verbe (y compris les espaces)
+                    if (index > lastIndex) {
+                        const textBefore = text.substring(lastIndex, index);
+                        elements.push(textBefore);
+                    }
+
+                    // Ajouter le verbe cliquable
+                    const selection = selectedVerbs[info.key];
+                    const className = selection
+                        ? selection.correct && selection.type === 'pc'
+                            ? 'found-pc'
+                            : selection.correct && selection.type === 'imp'
+                            ? 'found-imp'
+                            : 'bg-red-200'
+                        : 'hover:bg-yellow-100';
+
+                    elements.push(
+                        <span
+                            key={info.key}
+                            onClick={() => handleWordClick(info)}
+                            className={`clickable-word ${className}`}
+                            style={{ cursor: 'pointer', padding: '2px 4px', borderRadius: '3px', display: 'inline' }}
+                        >
+                            {text.substring(info.startIndex, info.endIndex)}
+                        </span>
+                    );
+
+                    lastIndex = info.endIndex;
+                });
+
+                // Ajouter le texte restant
+                if (lastIndex < text.length) {
+                    elements.push(text.substring(lastIndex));
+                }
+
+                return <>{elements}</>;
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="mb-6 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg">
+                        <div className="text-center">
+                            <div className="text-2xl font-bold mb-2">
+                                {identifiedVerbs} / {totalVerbs} verbes identifiés
+                            </div>
+                            <div className="text-lg text-gray-600">
+                                Score : {score} points • Correct : {correctVerbs}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card p-8 mb-6">
+                        <h3 className="text-2xl font-bold mb-4 text-center">
+                            Identifie les verbes au passé composé et à l'imparfait
+                        </h3>
+                        <p className="text-center text-gray-600 mb-6">
+                            Clique sur un verbe, puis choisis son temps !
+                        </p>
+
+                        <div className="bg-gray-50 p-6 rounded-lg leading-loose text-lg">
+                            {renderText()}
+                        </div>
+                    </div>
+
+                    {/* Boutons de navigation */}
+                    <div className="flex justify-between">
+                        <button
+                            onClick={onPrevious}
+                            className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                        >
+                            ← Précédent
+                        </button>
+                        
+                        <button
+                            onClick={() => onComplete(score)}
+                            className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                        >
+                            Suivant →
+                        </button>
+                    </div>
+
+                    {/* Modal de choix */}
+                    {clickedWord && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="card p-8 max-w-md slide-enter">
+                                <h3 className="text-2xl font-bold mb-6 text-center">
+                                    "{clickedWord.display}"
+                                </h3>
+                                <p className="text-center text-gray-600 mb-6">
+                                    À quel temps est ce verbe ?
+                                </p>
+
+                                {showFeedback && (
+                                    <div className={`mb-6 p-4 rounded-lg text-center font-bold ${
+                                        showFeedback.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {showFeedback.message}
+                                    </div>
+                                )}
+
+                                {!showFeedback && (
+                                    <div className="space-y-4">
+                                        <button
+                                            onClick={() => handleChoice('pc')}
+                                            className="w-full p-4 bg-blue-100 hover:bg-blue-200 border-2 border-blue-500 rounded-lg font-bold text-lg transition-all"
+                                        >
+                                            <span className="color-pc">Passé Composé</span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleChoice('imp')}
+                                            className="w-full p-4 bg-orange-100 hover:bg-orange-200 border-2 border-orange-500 rounded-lg font-bold text-lg transition-all"
+                                        >
+                                            <span className="color-imp">Imparfait</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setClickedWord(null)}
+                                            className="w-full mt-2 p-2 text-gray-600 hover:text-gray-800"
+                                        >
+                                            Annuler
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: TIMELINE GAME
+        // ============================================
+
+        const TimelineGame = ({ onComplete, onPrevious }) => {
+            const [currentRound, setCurrentRound] = useState(0);
+            const [lineAction, setLineAction] = useState(null);
+            const [triangleAction, setTriangleAction] = useState(null);
+            const [isChecked, setIsChecked] = useState(false);
+            const [isCorrect, setIsCorrect] = useState(false);
+            const [score, setScore] = useState(0);
+            const [draggedItem, setDraggedItem] = useState(null);
+            const [showFinalAnimation, setShowFinalAnimation] = useState(false);
+
+            const finalMessages = [
+                "Excellent ! Mais peux-tu maintenir ce niveau jusqu'au bout ?",
+                "Bravo ! Es-tu prêt(e) pour un défi encore plus grand ?",
+                "Bien joué ! Voyons si tu arrives à finir sans erreur...",
+                "Super ! Mais attention, ça va se corser !",
+                "Impressionnant ! Continue comme ça si tu peux...",
+                "Pas mal du tout ! Reste concentré(e) pour la suite !"
+            ];
+
+            const rounds = [
+                {
+                    id: 1,
+                    actions: [
+                        { text: "J'étudiais à l'université", type: "line", verb: "(étudier - imparfait)" },
+                        { text: "J'ai rencontré Monique pour la première fois", type: "triangle", verb: "(rencontrer - P. composé)" }
+                    ]
+                },
+                {
+                    id: 2,
+                    actions: [
+                        { text: "Je voulais fabriquer des fusées", type: "line", verb: "(vouloir - imparfait)" },
+                        { text: "J'ai étudié l'aérospatiale", type: "triangle", verb: "(étudier - P. composé)" }
+                    ]
+                },
+                {
+                    id: 3,
+                    actions: [
+                        { text: "Il pleuvait dehors", type: "line", verb: "(pleuvoir - imparfait)" },
+                        { text: "Je suis sorti avec un parapluie", type: "triangle", verb: "(sortir - P. composé)" }
+                    ]
+                },
+                {
+                    id: 4,
+                    actions: [
+                        { text: "Nous regardions la télé tranquillement", type: "line", verb: "(regarder - imparfait)" },
+                        { text: "Le téléphone a sonné", type: "triangle", verb: "(sonner - P. composé)" }
+                    ]
+                },
+                {
+                    id: 5,
+                    actions: [
+                        { text: "J'avais très faim", type: "line", verb: "(avoir - imparfait)" },
+                        { text: "J'ai mangé un sandwich", type: "triangle", verb: "(manger - P. composé)" }
+                    ]
+                },
+                {
+                    id: 6,
+                    actions: [
+                        { text: "Elle portait une magnifique robe rouge", type: "line", verb: "(porter - imparfait)" },
+                        { text: "Je l'ai vue de loin", type: "triangle", verb: "(voir - P. composé)" }
+                    ]
+                }
+            ];
+
+            const currentRoundData = rounds[currentRound];
+
+            const handleDragStart = (action) => {
+                setDraggedItem(action);
+            };
+
+            const handleDrop = (zone) => {
+                if (!draggedItem) return;
+                
+                if (zone === 'line') {
+                    setLineAction(draggedItem);
+                } else {
+                    setTriangleAction(draggedItem);
+                }
+                setDraggedItem(null);
+            };
+
+            const handleCheck = () => {
+                if (!lineAction || !triangleAction) return;
+
+                const correct = lineAction.type === 'line' && triangleAction.type === 'triangle';
+                setIsCorrect(correct);
+                setIsChecked(true);
+
+                if (correct) {
+                    setScore(score + 10);
+                    createConfetti();
+                }
+            };
+
+            const handleNext = () => {
+                if (currentRound < rounds.length - 1) {
+                    setCurrentRound(currentRound + 1);
+                    setLineAction(null);
+                    setTriangleAction(null);
+                    setIsChecked(false);
+                    setIsCorrect(false);
+                } else {
+                    // Dernier round - animation finale
+                    setShowFinalAnimation(true);
+                    setTimeout(() => {
+                        onComplete(score + (isCorrect ? 10 : 0));
+                    }, 3000);
+                }
+            };
+
+            const handleReset = () => {
+                setLineAction(null);
+                setTriangleAction(null);
+                setIsChecked(false);
+                setIsCorrect(false);
+            };
+
+            const availableActions = currentRoundData.actions.filter(
+                action => action !== lineAction && action !== triangleAction
+            ).sort(() => Math.random() - 0.5); // Mélanger l'ordre
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    {/* En-tête */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="text-lg font-bold">
+                            Round {currentRound + 1} / {rounds.length}
+                        </div>
+                        <div className="text-xl font-bold text-purple-600">
+                            Score : {score}
+                        </div>
+                    </div>
+
+                    {/* Barre de progression */}
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
+                        <div 
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${((currentRound + 1) / rounds.length) * 100}%` }}
+                        ></div>
+                    </div>
+
+                    <div className="card p-8">
+                        <h3 className="text-2xl font-bold mb-6 text-center">
+                            ⏱️ Jeu : Place les actions au bon endroit !
+                        </h3>
+                        
+                        <div className="bg-blue-50 p-4 rounded-lg mb-8 text-center">
+                            <p className="text-lg">
+                                <span className="color-imp">Ligne</span> = Action qui dure (Imparfait) • 
+                                <span className="color-pc"> Triangle</span> = Action ponctuelle (Passé Composé)
+                            </p>
+                        </div>
+
+                        {/* Zone de visualisation */}
+                        <div className="bg-gray-50 p-8 rounded-lg mb-8 relative min-h-[350px]">
+                            {/* Ligne horizontale (durée) */}
+                            <div className="absolute top-1/2 left-[10%] right-[10%] transform -translate-y-1/2">
+                                <div 
+                                    className={`h-3 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 rounded-full relative ${
+                                        !isChecked ? 'border-4 border-dashed border-orange-600' : ''
+                                    }`}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={() => handleDrop('line')}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {/* Flèche vers la gauche pour indiquer le sens temporel */}
+                                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-3">
+                                        <div className="w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[10px] border-r-orange-500"></div>
+                                    </div>
+                                    
+                                    {/* Drop zone pour la ligne */}
+                                    {!lineAction && !isChecked && (
+                                        <div className="absolute -top-16 left-[25%] transform -translate-x-1/2 text-center w-64">
+                                            <div className="bg-orange-100 border-2 border-orange-400 border-dashed rounded-lg p-4 text-sm font-semibold">
+                                                Dépose ici la DESCRIPTION
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Action placée sur la ligne */}
+                                    {lineAction && (
+                                        <div className="absolute -top-20 left-[25%] transform -translate-x-1/2 w-80">
+                                            <div className="p-4 rounded-lg shadow-lg text-center bg-white border-2 border-orange-400">
+                                                <p className="font-semibold">{lineAction.text}</p>
+                                                <p className="text-xs text-gray-600 mt-1">{lineAction.verb}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Triangle (action ponctuelle) - pointe vers le bas */}
+                                <div 
+                                    className="absolute left-[60%] -top-8"
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={() => handleDrop('triangle')}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {/* Triangle visuel - pointe vers le bas */}
+                                    <div className="relative">
+                                        <div 
+                                            className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[40px] border-t-blue-500"
+                                            style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}
+                                        ></div>
+                                        
+                                        {/* Drop zone pour le triangle - au-dessus du triangle */}
+                                        {!triangleAction && !isChecked && (
+                                            <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 w-64 text-center">
+                                                <div className="bg-blue-100 border-2 border-blue-400 border-dashed rounded-lg p-4 text-sm font-semibold">
+                                                    Dépose ici l'ACTION
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Action placée sur le triangle */}
+                                        {triangleAction && (
+                                            <div className="absolute -top-36 left-1/2 transform -translate-x-1/2 w-80">
+                                                <div className="p-4 rounded-lg shadow-lg text-center bg-white border-2 border-blue-400">
+                                                    <p className="font-semibold">{triangleAction.text}</p>
+                                                    <p className="text-xs text-gray-600 mt-1">{triangleAction.verb}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cartes à glisser */}
+                        {!isChecked && availableActions.length > 0 && (
+                            <div className="mb-6">
+                                <h4 className="font-bold mb-4 text-center text-lg">Glisse les actions :</h4>
+                                <div className="flex gap-4 justify-center flex-wrap">
+                                    {availableActions.map((action, idx) => (
+                                        <div
+                                            key={idx}
+                                            draggable
+                                            onDragStart={() => handleDragStart(action)}
+                                            className="bg-white p-4 rounded-lg shadow-md border-2 border-gray-300 cursor-move hover:shadow-lg hover:scale-105 transition-all w-80"
+                                        >
+                                            <p className="font-semibold text-center">{action.text}</p>
+                                            <p className="text-xs text-gray-600 text-center mt-2">{action.verb}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Feedback */}
+                        {isChecked && (
+                            <div className={`mt-6 p-4 rounded-lg text-center ${
+                                isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                            }`}>
+                                {isCorrect ? (
+                                    <div>
+                                        <div className="font-bold text-xl mb-2">✅ Parfait !</div>
+                                        <div className="text-sm">
+                                            L'action qui dure (<span className="color-imp">imparfait</span>) sur la ligne, 
+                                            l'action (<span className="color-pc">P. composé</span>) sur le triangle !
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <div className="font-bold text-xl mb-2">❌ Pas tout à fait...</div>
+                                        <div className="text-sm">
+                                            Rappel : <span className="color-imp">Imparfait</span> = description (ligne) • 
+                                            <span className="color-pc">Passé Composé</span> = action (triangle)
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Boutons de navigation */}
+                    <div className="flex justify-between mt-6">
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    if (currentRound > 0) {
+                                        setCurrentRound(currentRound - 1);
+                                        setLineAction(null);
+                                        setTriangleAction(null);
+                                        setIsChecked(false);
+                                        setIsCorrect(false);
+                                    } else {
+                                        // Si premier round, revenir au slide précédent
+                                        onPrevious();
+                                    }
+                                }}
+                                className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                            >
+                                ← Précédent
+                            </button>
+                            
+                            <button
+                                onClick={handleReset}
+                                className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                            >
+                                Réinitialiser
+                            </button>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                            {!isChecked && lineAction && triangleAction && (
+                                <button
+                                    onClick={handleCheck}
+                                    className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                                >
+                                    Vérifier
+                                </button>
+                            )}
+                            
+                            <button
+                                onClick={handleNext}
+                                className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                            >
+                                {currentRound === rounds.length - 1 ? 'Suivant →' : 'Round suivant →'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Animation finale */}
+                    {showFinalAnimation && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="card p-12 max-w-md text-center slide-enter">
+                                {score >= rounds.length * 10 * 0.8 ? (
+                                    <>
+                                        <div className="text-8xl mb-6 dancing-person">🎉</div>
+                                        <h2 className="text-4xl font-bold mb-4">Bravo !</h2>
+                                        <p className="text-xl mb-4">
+                                            {finalMessages[Math.floor(Math.random() * finalMessages.length)]}
+                                        </p>
+                                        <div className="text-3xl font-bold text-purple-600">
+                                            Score : {score + (isCorrect ? 10 : 0)} points.
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="text-8xl mb-6">😅</div>
+                                        <h2 className="text-4xl font-bold mb-4">Continue !</h2>
+                                        <p className="text-xl mb-4">
+                                            N'abandonne pas ! Avec un peu plus de pratique, tu vas y arriver.
+                                        </p>
+                                        <div className="text-3xl font-bold text-gray-600">
+                                            Score : {score + (isCorrect ? 10 : 0)} points.
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: QCM EXERCISE
+        // ============================================
+
+        const QCMExercise = ({ exercises, onComplete, onPrevious, title }) => {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [isCorrect, setIsCorrect] = useState(null);
+            const [score, setScore] = useState(0);
+            const [showHint, setShowHint] = useState(false);
+            const [attemptCount, setAttemptCount] = useState(0);
+            const [showEncouragement, setShowEncouragement] = useState(false);
+            const [badges, setBadges] = useState([]);
+            const [combo, setCombo] = useState(0);
+            const [showFinalAnimation, setShowFinalAnimation] = useState(false);
+
+            const currentEx = exercises[currentQuestion];
+
+            const handleAnswer = (answer) => {
+                if (isCorrect !== null) return;
+                
+                setSelectedAnswer(answer);
+                const correct = answer === currentEx.correct;
+                setIsCorrect(correct);
+
+                if (correct) {
+                    setScore(score + 10);
+                    setCombo(combo + 1);
+                    
+                    if ((currentQuestion + 1) % 3 === 0) {
+                        createConfetti();
+                    }
+
+                    if (combo + 1 === 3) {
+                        setBadges([...badges, '🔥 En feu !']);
+                    } else if (combo + 1 === 5) {
+                        setBadges([...badges, '⭐ Excellent !']);
+                    }
+                } else {
+                    setCombo(0);
+                    setAttemptCount(attemptCount + 1);
+                    
+                    if (attemptCount === 0) {
+                        setTimeout(() => {
+                            setIsCorrect(null);
+                            setSelectedAnswer(null);
+                        }, 1500);
+                    }
+                }
+            };
+
+            const handleNext = () => {
+                // Vérifier si on doit afficher l'encouragement (midpoint/endpoint) ET que l'utilisateur a répondu
+                if ((currentEx.isMidpoint || currentEx.isEndpoint) && isCorrect !== null) {
+                    setShowEncouragement(true);
+                    return;
+                }
+                
+                if (currentQuestion < exercises.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setSelectedAnswer(null);
+                    setIsCorrect(null);
+                    setShowHint(false);
+                    setAttemptCount(0);
+                } else {
+                    // Dernière question - animation finale seulement si score > 0
+                    if (score > 0 || isCorrect) {
+                        setShowFinalAnimation(true);
+                        setTimeout(() => {
+                            onComplete(score + (isCorrect ? 10 : 0));
+                        }, 3000);
+                    } else {
+                        // Pas de score, pas d'animation
+                        onComplete(0);
+                    }
+                }
+            };
+
+            const handleCloseEncouragement = () => {
+                setShowEncouragement(false);
+                if (currentEx.isEndpoint) {
+                    onComplete(score);
+                } else if (currentQuestion < exercises.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setSelectedAnswer(null);
+                    setIsCorrect(null);
+                    setShowHint(false);
+                    setAttemptCount(0);
+                }
+            };
+
+            return (
+                <div className="max-w-3xl mx-auto">
+                    {/* En-tête avec score */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="text-lg font-bold">
+                            Question {currentQuestion + 1} / {exercises.length}
+                        </div>
+                        <div className="text-xl font-bold text-purple-600">
+                            Score : {score}
+                        </div>
+                    </div>
+
+                    {/* Badges */}
+                    {badges.length > 0 && (
+                        <div className="flex gap-2 mb-4 flex-wrap">
+                            {badges.map((badge, idx) => (
+                                <span key={idx} className="badge-pulse bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold">
+                                    {badge}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Barre de progression */}
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+                        <div 
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${((currentQuestion + 1) / exercises.length) * 100}%` }}
+                        ></div>
+                    </div>
+
+                    {/* Question */}
+                    <div className="card p-8 mb-6">
+                        <p className="text-xl mb-6 leading-relaxed">
+                            {currentEx.question}
+                        </p>
+
+                        {/* Bouton hint */}
+                        <button
+                            onClick={() => setShowHint(!showHint)}
+                            className="mb-4 text-sm text-blue-600 hover:text-blue-800 font-semibold"
+                        >
+                            💡 {showHint ? 'Cacher' : 'Afficher'} l'indice
+                        </button>
+
+                        {showHint && (
+                            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm">
+                                {currentEx.hint}
+                            </div>
+                        )}
+
+                        {/* Options */}
+                        <div className="space-y-3">
+                            {currentEx.options.map((option, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleAnswer(option)}
+                                    disabled={isCorrect !== null}
+                                    className={`w-full p-4 rounded-lg text-left font-semibold transition-all ${
+                                        selectedAnswer === option
+                                            ? isCorrect
+                                                ? 'bg-green-100 border-2 border-green-500'
+                                                : 'bg-red-100 border-2 border-red-500'
+                                            : 'bg-gray-50 hover:bg-gray-100 border-2 border-gray-200'
+                                    }`}
+                                >
+                                    {option}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Feedback */}
+                        {isCorrect !== null && (
+                            <div className={`mt-4 p-4 rounded-lg ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                {isCorrect ? (
+                                    <div>
+                                        <div className="font-bold">✅ Correct !</div>
+                                        <div className="text-sm mt-1">{currentEx.explanation}</div>
+                                    </div>
+                                ) : attemptCount === 0 ? (
+                                    <div className="font-bold">❌ Incorrect. Essaie encore !</div>
+                                ) : (
+                                    <div>
+                                        <div className="font-bold">❌ Incorrect. La réponse était : {currentEx.correct}</div>
+                                        <div className="text-sm mt-1">{currentEx.explanation}</div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex justify-between">
+                        <button
+                            onClick={() => {
+                                if (currentQuestion > 0) {
+                                    setCurrentQuestion(currentQuestion - 1);
+                                    setSelectedAnswer(null);
+                                    setIsCorrect(null);
+                                    setShowHint(false);
+                                    setAttemptCount(0);
+                                } else {
+                                    // Si première question, revenir au slide précédent
+                                    onPrevious();
+                                }
+                            }}
+                            className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                        >
+                            ← Précédent
+                        </button>
+                        
+                        <button
+                            onClick={handleNext}
+                            className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                        >
+                            {currentQuestion === exercises.length - 1 ? 'Suivant →' : 'Suivant →'}
+                        </button>
+                    </div>
+
+                    {/* Modal encouragement */}
+                    {showEncouragement && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="card p-8 max-w-md text-center slide-enter">
+                                <div className="text-6xl mb-4">🎉</div>
+                                <h2 className="text-3xl font-bold mb-4">Bravo !</h2>
+                                <p className="text-lg mb-6">
+                                    {ENCOURAGEMENT_MESSAGES[Math.floor(Math.random() * ENCOURAGEMENT_MESSAGES.length)]}
+                                </p>
+                                <button
+                                    onClick={handleCloseEncouragement}
+                                    className="btn-primary text-white px-8 py-3 rounded-lg font-bold"
+                                >
+                                    Continuer
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: INPUT EXERCISE
+        // ============================================
+
+        const InputExercise = ({ exercises, onComplete, onPrevious, title }) => {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [userAnswer, setUserAnswer] = useState('');
+            const [isCorrect, setIsCorrect] = useState(null);
+            const [score, setScore] = useState(0);
+            const [showHint, setShowHint] = useState(false);
+            const [attemptCount, setAttemptCount] = useState(0);
+            const [showEncouragement, setShowEncouragement] = useState(false);
+            const [badges, setBadges] = useState([]);
+            const [combo, setCombo] = useState(0);
+            const [showFinalAnimation, setShowFinalAnimation] = useState(false);
+
+            const currentEx = exercises[currentQuestion];
+
+            const handleCheck = () => {
+                if (isCorrect !== null) return;
+
+                const trimmedAnswer = userAnswer.trim();
+                const correct = trimmedAnswer.toLowerCase() === currentEx.answer.toLowerCase();
+                
+                setIsCorrect(correct);
+
+                if (correct) {
+                    setScore(score + 10);
+                    setCombo(combo + 1);
+                    
+                    if ((currentQuestion + 1) % 3 === 0) {
+                        createConfetti();
+                    }
+
+                    if (combo + 1 === 3) {
+                        setBadges([...badges, '🔥 En feu !']);
+                    } else if (combo + 1 === 5) {
+                        setBadges([...badges, '⭐ Excellent !']);
+                    }
+                } else {
+                    setCombo(0);
+                    setAttemptCount(attemptCount + 1);
+                    
+                    if (attemptCount === 0) {
+                        setTimeout(() => {
+                            setIsCorrect(null);
+                        }, 1500);
+                    }
+                }
+            };
+
+            const handleNext = () => {
+                // Vérifier si on doit afficher l'encouragement ET que l'utilisateur a répondu
+                if ((currentEx.isMidpoint || currentEx.isEndpoint) && isCorrect !== null) {
+                    setShowEncouragement(true);
+                    return;
+                }
+                
+                if (currentQuestion < exercises.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setUserAnswer('');
+                    setIsCorrect(null);
+                    setShowHint(false);
+                    setAttemptCount(0);
+                } else {
+                    // Dernière question - animation finale seulement si score > 0
+                    if (score > 0 || isCorrect) {
+                        setShowFinalAnimation(true);
+                        setTimeout(() => {
+                            onComplete(score + (isCorrect ? 10 : 0));
+                        }, 3000);
+                    } else {
+                        // Pas de score, pas d'animation
+                        onComplete(0);
+                    }
+                }
+            };
+
+            const handleCloseEncouragement = () => {
+                setShowEncouragement(false);
+                if (currentEx.isEndpoint) {
+                    onComplete(score);
+                } else if (currentQuestion < exercises.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setUserAnswer('');
+                    setIsCorrect(null);
+                    setShowHint(false);
+                    setAttemptCount(0);
+                }
+            };
+
+            return (
+                <div className="max-w-3xl mx-auto">
+                    {/* En-tête */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="text-lg font-bold">
+                            Question {currentQuestion + 1} / {exercises.length}
+                        </div>
+                        <div className="text-xl font-bold text-purple-600">
+                            Score : {score}
+                        </div>
+                    </div>
+
+                    {/* Badges */}
+                    {badges.length > 0 && (
+                        <div className="flex gap-2 mb-4 flex-wrap">
+                            {badges.map((badge, idx) => (
+                                <span key={idx} className="badge-pulse bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold">
+                                    {badge}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Barre de progression */}
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+                        <div 
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${((currentQuestion + 1) / exercises.length) * 100}%` }}
+                        ></div>
+                    </div>
+
+                    {/* Question */}
+                    <div className="card p-8 mb-6">
+                        <div className="mb-4 text-sm font-semibold text-gray-600">
+                            🔍 Verbe à conjuguer : {currentEx.verb}
+                        </div>
+
+                        <p className="text-xl mb-4 leading-relaxed">
+                            {currentEx.questionBefore}
+                            <input
+                                type="text"
+                                value={userAnswer}
+                                onChange={(e) => setUserAnswer(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleCheck()}
+                                disabled={isCorrect !== null}
+                                className="inline-block px-3 py-1 border-b-2 border-purple-500 focus:outline-none focus:border-purple-700 mx-2 min-w-[200px]"
+                                placeholder="..."
+                            />
+                            {currentEx.questionAfter}
+                        </p>
+
+                        {/* Bouton hint */}
+                        <button
+                            onClick={() => setShowHint(!showHint)}
+                            className="mb-4 text-sm text-blue-600 hover:text-blue-800 font-semibold"
+                        >
+                            💡 {showHint ? 'Cacher' : 'Afficher'} l'indice
+                        </button>
+
+                        {showHint && (
+                            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm">
+                                {currentEx.hint}
+                            </div>
+                        )}
+
+                        {/* Feedback */}
+                        {isCorrect !== null && (
+                            <div className={`mt-4 p-4 rounded-lg ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                {isCorrect ? (
+                                    <div className="font-bold">✅ Correct !</div>
+                                ) : attemptCount === 0 ? (
+                                    <div className="font-bold">❌ Incorrect. Essaie encore !</div>
+                                ) : (
+                                    <div className="font-bold">❌ Incorrect. La réponse était : {currentEx.answer}</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex justify-between">
+                        <button
+                            onClick={() => {
+                                if (currentQuestion > 0) {
+                                    setCurrentQuestion(currentQuestion - 1);
+                                    setUserAnswer('');
+                                    setIsCorrect(null);
+                                    setShowHint(false);
+                                    setAttemptCount(0);
+                                } else {
+                                    // Si première question, revenir au slide précédent
+                                    onPrevious();
+                                }
+                            }}
+                            className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                        >
+                            ← Précédent
+                        </button>
+                        
+                        <div className="flex gap-3">
+                            {isCorrect === null && (
+                                <button
+                                    onClick={handleCheck}
+                                    className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                                >
+                                    Vérifier
+                                </button>
+                            )}
+                            
+                            <button
+                                onClick={handleNext}
+                                className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                            >
+                                {currentQuestion === exercises.length - 1 ? 'Suivant →' : 'Suivant →'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Modal encouragement */}
+                    {showEncouragement && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="card p-8 max-w-md text-center slide-enter">
+                                <div className="text-6xl mb-4">🎉</div>
+                                <h2 className="text-3xl font-bold mb-4">Bravo !</h2>
+                                <p className="text-lg mb-6">
+                                    {ENCOURAGEMENT_MESSAGES[Math.floor(Math.random() * ENCOURAGEMENT_MESSAGES.length)]}
+                                </p>
+                                <button
+                                    onClick={handleCloseEncouragement}
+                                    className="btn-primary text-white px-8 py-3 rounded-lg font-bold"
+                                >
+                                    Continuer
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: DRAG DROP EXERCISE
+        // ============================================
+
+        const DragDropExercise = ({ exercise, onComplete, onPrevious }) => {
+            const [matches, setMatches] = useState({});
+            const [isChecked, setIsChecked] = useState(false);
+            const [isCorrect, setIsCorrect] = useState(false);
+
+            // Mélanger l'ordre des schémas pour le select
+            const shuffledSchemas = [...exercise.pairs].sort(() => Math.random() - 0.5);
+
+            const handleDrop = (situation, schema, uniqueId) => {
+                setMatches({ ...matches, [situation]: uniqueId });
+            };
+
+            const handleCheck = () => {
+                const correct = exercise.pairs.every(pair => 
+                    matches[pair.situation] === pair.uniqueId
+                );
+                
+                setIsCorrect(correct);
+                setIsChecked(true);
+
+                if (correct) {
+                    createConfetti();
+                }
+            };
+
+            const handleReset = () => {
+                setMatches({});
+                setIsChecked(false);
+                setIsCorrect(false);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="card p-8 mb-6">
+                        <h3 className="text-2xl font-bold mb-6 text-center">{exercise.instructions}</h3>
+                        
+                        {/* Situations uniquement - pas de colonne à droite */}
+                        <div className="max-w-2xl mx-auto">
+                            <div className="space-y-4">
+                                {exercise.pairs.map(pair => (
+                                    <div
+                                        key={pair.id}
+                                        className="bg-blue-50 p-5 rounded-lg border-2 border-blue-300"
+                                    >
+                                        <p className="text-base mb-3 font-semibold">{pair.situation}</p>
+                                        <select
+                                            value={matches[pair.situation] || ''}
+                                            onChange={(e) => handleDrop(pair.situation, e.target.value, e.target.value)}
+                                            disabled={isChecked}
+                                            className="w-full p-3 border-2 rounded-lg font-semibold"
+                                        >
+                                            <option value="">Choisis un schéma...</option>
+                                            {shuffledSchemas.map(p => (
+                                                <option key={p.uniqueId} value={p.uniqueId}>
+                                                    {p.schema}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {isChecked && (
+                            <div className={`mt-6 p-4 rounded-lg text-center ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                {isCorrect ? (
+                                    <div>
+                                        <div className="font-bold text-xl mb-2">✅ Excellent !</div>
+                                        <div>Toutes les associations sont correctes ! Tu maîtrises bien les schémas temporels.</div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <div className="font-bold text-xl mb-2">❌ Pas tout à fait...</div>
+                                        <div>Vérifie bien tes réponses. Pense à la durée des actions !</div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-between">
+                        <div className="flex gap-3">
+                            <button
+                                onClick={onPrevious}
+                                className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                            >
+                                ← Précédent
+                            </button>
+                            
+                            <button
+                                onClick={handleReset}
+                                className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                            >
+                                Recommencer
+                            </button>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                            {!isChecked && Object.keys(matches).length === exercise.pairs.length && (
+                                <button
+                                    onClick={handleCheck}
+                                    className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                                >
+                                    Vérifier
+                                </button>
+                            )}
+                            
+                            <button
+                                onClick={() => onComplete(isCorrect ? 100 : 0)}
+                                className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                            >
+                                Suivant →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: FILL IN EXERCISE
+        // ============================================
+
+        const FillInExercise = ({ exercise, onComplete, onPrevious }) => {
+            const [answers, setAnswers] = useState({});
+            const [isChecked, setIsChecked] = useState(false);
+            const [results, setResults] = useState({});
+
+            const handleChange = (id, index, value) => {
+                setAnswers({
+                    ...answers,
+                    [`${id}-${index}`]: value
+                });
+            };
+
+            const handleCheck = () => {
+                const newResults = {};
+                let correctCount = 0;
+                let totalCount = 0;
+
+                exercise.forEach(item => {
+                    item.answers.forEach((correctAnswer, idx) => {
+                        const key = `${item.id}-${idx}`;
+                        const userAnswer = (answers[key] || '').trim().toLowerCase();
+                        const isCorrect = userAnswer === correctAnswer.toLowerCase();
+                        newResults[key] = isCorrect;
+                        totalCount++;
+                        if (isCorrect) correctCount++;
+                    });
+                });
+
+                setResults(newResults);
+                setIsChecked(true);
+
+                if (correctCount === totalCount) {
+                    createConfetti();
+                    setTimeout(() => onComplete(100), 2000);
+                }
+            };
+
+            const handleReset = () => {
+                setAnswers({});
+                setResults({});
+                setIsChecked(false);
+            };
+
+            return (
+                <div className="max-w-3xl mx-auto">
+                    <div className="card p-8 mb-6">
+                        <h3 className="text-2xl font-bold mb-6">Complète les phrases avec le bon temps</h3>
+                        
+                        <div className="space-y-6">
+                            {exercise.map((item, itemIdx) => (
+                                <div key={item.id} className="border-b pb-4">
+                                    <p className="mb-2 text-lg">
+                                        {item.sentence.split(/___/).map((part, idx) => (
+                                            <React.Fragment key={idx}>
+                                                {part}
+                                                {idx < item.answers.length && (
+                                                    <input
+                                                        type="text"
+                                                        value={answers[`${item.id}-${idx}`] || ''}
+                                                        onChange={(e) => handleChange(item.id, idx, e.target.value)}
+                                                        disabled={isChecked}
+                                                        className={`inline-block px-2 py-1 border-b-2 mx-1 min-w-[150px] ${
+                                                            isChecked
+                                                                ? results[`${item.id}-${idx}`]
+                                                                    ? 'border-green-500 bg-green-50'
+                                                                    : 'border-red-500 bg-red-50'
+                                                                : 'border-purple-500'
+                                                        }`}
+                                                    />
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                    </p>
+                                    {isChecked && (
+                                        <div className="text-sm text-gray-600 mt-2">
+                                            Verbes : {item.verbs.join(', ')}
+                                            {' - '}
+                                            Réponses : {item.answers.join(', ')}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {isChecked && (
+                            <div className="mt-6 p-4 rounded-lg bg-blue-50">
+                                <div className="font-bold text-center text-xl">
+                                    Score : {Object.values(results).filter(r => r).length} / {Object.keys(results).length}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-between">
+                        <div className="flex gap-3">
+                            <button
+                                onClick={onPrevious}
+                                className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                            >
+                                ← Précédent
+                            </button>
+                            
+                            <button
+                                onClick={handleReset}
+                                className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                            >
+                                Recommencer
+                            </button>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                            {!isChecked && (
+                                <button
+                                    onClick={handleCheck}
+                                    className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                                >
+                                    Vérifier
+                                </button>
+                            )}
+                            
+                            <button
+                                onClick={onComplete}
+                                className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                            >
+                                Suivant →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: TEXT ANALYSIS EXERCISE
+        // ============================================
+
+        const TextAnalysisExercise = ({ exercise, onComplete, onPrevious }) => {
+            const [foundVerbs, setFoundVerbs] = useState({});
+            const [selectedWord, setSelectedWord] = useState(null);
+            const [inputInfinitive, setInputInfinitive] = useState('');
+
+            const words = exercise.text.split(/(\s+|[.,;!?])/).filter(w => w.trim());
+
+            const handleWordClick = (word, index) => {
+                const cleanWord = word.toLowerCase().replace(/^j'/g, '');
+                const verbInfo = exercise.verbs.find(v => 
+                    v.verb.toLowerCase() === cleanWord && v.index === index
+                );
+
+                if (verbInfo && !foundVerbs[`${word}-${index}`]) {
+                    setSelectedWord({ word: cleanWord, index, verbInfo });
+                    setInputInfinitive('');
+                }
+            };
+
+            const handleSubmitInfinitive = () => {
+                if (!selectedWord) return;
+
+                const isCorrect = inputInfinitive.toLowerCase() === selectedWord.verbInfo.infinitive.toLowerCase();
+                
+                if (isCorrect) {
+                    setFoundVerbs({
+                        ...foundVerbs,
+                        [`${selectedWord.word}-${selectedWord.index}`]: selectedWord.verbInfo
+                    });
+                    createConfetti();
+                }
+
+                alert(isCorrect 
+                    ? `✅ Correct ! "${selectedWord.verbInfo.verb}" vient de "${selectedWord.verbInfo.infinitive}"`
+                    : `❌ Non, l'infinitif est "${selectedWord.verbInfo.infinitive}"`
+                );
+
+                setSelectedWord(null);
+                setInputInfinitive('');
+            };
+
+            const foundCount = Object.keys(foundVerbs).length;
+            const isComplete = foundCount >= exercise.target;
+
+            useEffect(() => {
+                if (isComplete) {
+                    setTimeout(() => onComplete(100), 1000);
+                }
+            }, [isComplete]);
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="card p-8 mb-6">
+                        <h3 className="text-2xl font-bold mb-4">Trouve les verbes au passé</h3>
+                        <p className="text-gray-600 mb-6">
+                            Clique sur un verbe conjugué pour donner son infinitif.
+                            <br />
+                            Objectif : Trouver {exercise.target} verbes
+                        </p>
+
+                        <div className="mb-6 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg">
+                            <div className="text-center font-bold text-xl">
+                                {foundCount} / {exercise.target} verbes trouvés
+                                {foundCount < exercise.target && (
+                                    <span className="block text-sm text-gray-600 mt-1">
+                                        Encore {exercise.target - foundCount} à trouver !
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg leading-relaxed text-lg">
+                            {words.map((word, idx) => {
+                                const cleanWord = word.toLowerCase().replace(/^j'/g, '');
+                                const verbInfo = exercise.verbs.find(v => 
+                                    v.verb.toLowerCase() === cleanWord && v.index === idx
+                                );
+                                const isFound = foundVerbs[`${cleanWord}-${idx}`];
+
+                                return (
+                                    <span
+                                        key={`${word}-${idx}`}
+                                        onClick={() => verbInfo && handleWordClick(word, idx)}
+                                        className={
+                                            verbInfo
+                                                ? isFound
+                                                    ? verbInfo.type === 'pc'
+                                                        ? 'clickable-word found-pc'
+                                                        : 'clickable-word found-imp'
+                                                    : 'clickable-word'
+                                                : ''
+                                        }
+                                    >
+                                        {word}
+                                    </span>
+                                );
+                            })}
+                        </div>
+
+                        {isComplete && (
+                            <div className="mt-6 p-4 rounded-lg bg-green-50 text-green-800 text-center font-bold">
+                                🎉 Bravo ! Tu as trouvé tous les verbes !
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Modal pour entrer l'infinitif */}
+                    {selectedWord && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="card p-8 max-w-md">
+                                <h3 className="text-xl font-bold mb-4">
+                                    Quel est l'infinitif de "{selectedWord.word}" ?
+                                </h3>
+                                <input
+                                    type="text"
+                                    value={inputInfinitive}
+                                    onChange={(e) => setInputInfinitive(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSubmitInfinitive()}
+                                    className="w-full p-3 border-2 border-purple-500 rounded-lg mb-4"
+                                    placeholder="Tape l'infinitif..."
+                                    autoFocus
+                                />
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setSelectedWord(null)}
+                                        className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={handleSubmitInfinitive}
+                                        className="flex-1 px-4 py-2 btn-primary text-white rounded-lg font-semibold"
+                                    >
+                                        Valider
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Navigation */}
+                    <div className="flex justify-between mt-6">
+                        <button
+                            onClick={onPrevious}
+                            className="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg font-semibold"
+                        >
+                            ← Précédent
+                        </button>
+                        
+                        <button
+                            onClick={onComplete}
+                            className="px-6 py-3 btn-primary text-white rounded-lg font-semibold"
+                        >
+                            Suivant →
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: TUTORIAL SCREEN
+        // ============================================
+
+        const TutorialScreen = ({ onNavigate }) => {
+            const [currentSlide, setCurrentSlide] = useState(0);
+
+            const slides = [
+                // Slide 1: Titre
+                {
+                    type: 'title',
+                    content: (
+                        <div className="flex items-center justify-center min-h-[500px]">
+                            <div className="text-center">
+                                <h1 className="text-6xl font-bold mb-8">⏰ Raconter une histoire :</h1>
+                                <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-orange-500">
+                                    l'imparfait et le passé composé dans un récit
+                                </h2>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 2: Introduction
+                {
+                    type: 'simple',
+                    content: (
+                        <div className="text-center">
+                            <h2 className="text-4xl font-bold mb-8">Commençons par une situation concrète 📖</h2>
+                            <p className="text-xl text-gray-600">
+                                Observe bien le texte suivant et essaie d'identifier les verbes au passé...
+                            </p>
+                        </div>
+                    )
+                },
+
+                // Slide 3: Texte interactif à identifier
+                {
+                    type: 'exercise',
+                    exerciseType: 'interactive-text',
+                    title: "Identifie les verbes"
+                },
+
+                // Slide 4: Transition analyse
+                {
+                    type: 'simple',
+                    content: (
+                        <div className="text-center">
+                            <h2 className="text-4xl font-bold mb-8">Analysons maintenant quelques phrases 🔍</h2>
+                            <p className="text-xl text-gray-600">
+                                Comprendre pourquoi on utilise le passé composé ou l'imparfait...
+                            </p>
+                        </div>
+                    )
+                },
+
+                // Slides 5-8: Analyses détaillées
+                {
+                    type: 'analysis',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6">Analyse 1 : Deux interprétations possibles</h3>
+                            <div className="space-y-6">
+                                <div className="bg-blue-50 p-6 rounded-lg">
+                                    <p className="text-xl mb-4 font-semibold">
+                                        Quand <span className="color-pc">je me suis levé</span>, <span className="color-pc">j'ai vu</span> 
+                                        qu'<span className="color-imp">il faisait</span> beau.
+                                    </p>
+                                    
+                                    <div className="mt-6 p-4 bg-white rounded-lg">
+                                        <h4 className="font-bold text-lg mb-3 color-pc">🔵 Interprétation 1 : Durée relative</h4>
+                                        <ul className="space-y-2 text-gray-700">
+                                            <li>• <span className="color-pc">je me suis levé, j'ai vu</span> → Deux actions ponctuelles, courtes.</li>
+                                            <li>• <span className="color-imp">il faisait beau</span> → Avant que je me lève, il faisait déjà beau, après aussi.</li>
+                                            <li className="font-bold mt-4">➢ Faire beau dure beaucoup plus longtemps que se lever et voir.</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="mt-6 p-4 bg-white rounded-lg">
+                                        <h4 className="font-bold text-lg mb-3 color-imp">🟠 Interprétation 2 : Avant et après</h4>
+                                        <div className="space-y-3 text-gray-700">
+                                            <div className="flex items-center gap-4">
+                                                <span className="bg-orange-100 px-3 py-1 rounded font-semibold">AVANT</span>
+                                                <span>J'<span className="color-imp">étais allongé</span> dans mon lit</span>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="bg-blue-100 px-3 py-1 rounded font-semibold">ACTION</span>
+                                                <span><span className="color-pc">Je me suis levé</span></span>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="bg-orange-100 px-3 py-1 rounded font-semibold">APRÈS</span>
+                                                <span>J'<span className="color-imp">étais debout</span></span>
+                                            </div>
+                                            <div className="mt-4 p-3 bg-green-50 rounded">
+                                                <p className="font-bold">
+                                                    ➢ <span className="color-imp">Imparfait</span> = une situation, un contexte qui dure<br/>
+                                                    ➢ <span className="color-pc">Passé composé</span> = l'action qui change la situation
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'analysis',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6">Analyse 2</h3>
+                            <div className="space-y-6">
+                                <div className="bg-orange-50 p-6 rounded-lg">
+                                    <p className="text-xl mb-4">
+                                        <span className="color-pc">Je suis parti</span> au parc du centre. <span className="color-imp">J'avais</span> rendez-vous là-bas.
+                                    </p>
+                                    <ul className="space-y-2 text-gray-700">
+                                        <li>• <span className="color-pc">Je suis parti</span> → Partir est le moment où on quitte un endroit : c'est court.</li>
+                                        <li>• J'<span className="color-imp">étais</span> chez moi (avant) → <span className="color-pc">je suis parti</span> → je n'<span className="color-imp">étais</span> plus chez moi (après).</li>
+                                        <li className="font-bold">→ Le <span className="color-pc">passé composé</span> indique une modification, un avant/après.</li>
+                                        
+                                        <li style={{height: '30px'}}></li>
+                                        
+                                        <li className="mt-4">• <span className="color-imp">J'avais rendez-vous</span> → Avoir rendez-vous a commencé quand j'ai parlé avec Lucie, avant de partir, et a fini quand je suis arrivé au parc.</li>
+                                        <li className="font-bold">→ L'<span className="color-imp">imparfait</span> indique quelque chose qui a commencé avant l'action.</li>
+                                        
+                                        <li style={{height: '30px'}}></li>
+                                        
+                                        <li className="font-bold mt-2">➢ Avoir rendez-vous est le contexte de l'action de partir.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'analysis',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6">Analyse 3</h3>
+                            <div className="space-y-6">
+                                <div className="bg-green-50 p-6 rounded-lg">
+                                    <p className="text-xl mb-4">
+                                        Quand <span className="color-pc">je suis arrivé</span>, <span className="color-imp">ils étaient</span> assis 
+                                        sur un banc et <span className="color-imp">regardaient</span> des enfants.
+                                    </p>
+                                    <ul className="space-y-2 text-gray-700">
+                                        <li>• Arriver dure seulement un instant.</li>
+                                        <li>• Avant que j'arrive, ils <span className="color-imp">étaient</span> déjà sur le banc, 
+                                        ils <span className="color-imp">regardaient</span> déjà des enfants.</li>
+                                        <li className="font-bold mt-4">➢ Être sur un banc et regarder des enfants a commencé avant que j'arrive et continue au moment où j'arrive.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'analysis',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6">Analyse 4</h3>
+                            <div className="space-y-6">
+                                <div className="bg-purple-50 p-6 rounded-lg">
+                                    <p className="text-xl mb-4">
+                                        Lucie <span className="color-imp">portait</span> une robe à fleurs et Salim, comme d'habitude, <span className="color-imp">était</span> tout en noir.
+                                    </p>
+                                    <ul className="space-y-2 text-gray-700">
+                                        <li>• Lucie <span className="color-imp">portait</span> cette robe avant que je la voie, pendant que je la voyais, et après aussi.</li>
+                                        <li className="mb-8">• Salim <span className="color-imp">était</span> habillé en noir avant, pendant et après ma rencontre avec lui.</li>
+                                        
+                                        <li className="font-bold mt-4">➢ Ce sont des descriptions, des états qui durent : on ne sait pas exactement quand ils ont commencé ni quand ils vont finir.</li>
+                                        <li className="font-bold">➢ L'<span className="color-imp">imparfait</span> décrit un état, une caractéristique qui n'a pas de début ni de fin précis dans le contexte du récit.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 9: Métaphore du théâtre
+                {
+                    type: 'theater',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">🎭 La métaphore du théâtre</h2>
+                            <div className="bg-gradient-to-br from-purple-100 via-pink-100 to-orange-100 p-8 rounded-lg">
+                                <div className="text-center mb-8">
+                                    <p className="text-2xl font-semibold mb-4">
+                                        Imagine une pièce de théâtre...
+                                    </p>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                                    <div className="bg-white p-6 rounded-lg shadow-lg border-4 border-orange-400">
+                                        <h3 className="text-2xl font-bold mb-4 color-imp text-center">
+                                            🎨 Le Décor = <span className="color-imp">Imparfait</span>
+                                        </h3>
+                                        <ul className="space-y-3 text-lg">
+                                            <li>✓ Le lieu où se passe l'action</li>
+                                            <li>✓ L'ambiance, l'atmosphère</li>
+                                            <li>✓ Ce qui est déjà là avant que l'action commence</li>
+                                            <li>✓ Ce qui reste après l'action</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="bg-white p-6 rounded-lg shadow-lg border-4 border-blue-400">
+                                        <h3 className="text-2xl font-bold mb-4 color-pc text-center">
+                                            🎬 L'Action = <span className="color-pc">Passé Composé</span>
+                                        </h3>
+                                        <ul className="space-y-3 text-lg">
+                                            <li>✓ Ce que font les personnages</li>
+                                            <li>✓ Les événements qui se passent</li>
+                                            <li>✓ Ce qui fait avancer l'histoire</li>
+                                            <li>✓ Ce qui change la situation</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-8 rounded-lg shadow-lg">
+                                    <h4 className="text-xl font-bold mb-4 text-center">Exemple détaillé :</h4>
+                                    <div className="space-y-4 text-lg leading-relaxed">
+                                        <div className="p-4 bg-orange-50 rounded-lg">
+                                            <span className="font-bold color-imp">🎨 DÉCOR (Imparfait) :</span>
+                                            <p className="mt-2">
+                                                Il <span className="color-imp">faisait</span> nuit. Le ciel <span className="color-imp">était</span> sombre. Des étoiles <span className="color-imp">brillaient</span>. Le village <span className="color-imp">dormait</span> paisiblement. Tout <span className="color-imp">était</span> calme.
+                                            </p>
+                                            <p className="mt-3 text-sm italic text-gray-600">
+                                                → C'est le contexte, l'atmosphère. Rien ne se passe encore. C'est la scène qui est plantée.
+                                            </p>
+                                        </div>
+
+                                        <div className="flex justify-center">
+                                            <div className="text-4xl">⬇️</div>
+                                        </div>
+
+                                        <div className="p-4 bg-blue-50 rounded-lg">
+                                            <span className="font-bold color-pc">🎬 ACTION (Passé Composé) :</span>
+                                            <p className="mt-2">
+                                                Soudain, un cri <span className="color-pc">a retenti</span>. Un homme <span className="color-pc">est sorti</span> de sa maison. Il <span className="color-pc">a couru</span> dans la rue. Il <span className="color-pc">a crié</span> : "Au feu !" Les gens <span className="color-pc">se sont réveillés</span>.
+                                            </p>
+                                            <p className="mt-3 text-sm italic text-gray-600">
+                                                → Ce sont les événements qui se passent. L'histoire avance. Les choses changent.
+                                            </p>
+                                        </div>
+
+                                        <div className="flex justify-center">
+                                            <div className="text-4xl">⬇️</div>
+                                        </div>
+
+                                        <div className="p-4 bg-orange-50 rounded-lg">
+                                            <span className="font-bold color-imp">🎨 NOUVEAU DÉCOR (Imparfait) :</span>
+                                            <p className="mt-2">
+                                                Maintenant, tout le monde <span className="color-imp">était</span> réveillé. Les gens <span className="color-imp">couraient</span> partout. L'atmosphère <span className="color-imp">était</span> chaotique. Des flammes <span className="color-imp">éclairaient</span> la nuit.
+                                            </p>
+                                            <p className="mt-3 text-sm italic text-gray-600">
+                                                → La situation a changé grâce aux actions (P. composé). Maintenant on décrit le nouveau contexte.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 p-6 bg-gradient-to-r from-purple-200 to-pink-200 rounded-lg text-center">
+                                    <p className="text-xl font-bold">
+                                        💡 Retiens bien : <span className="color-imp">Imparfait</span> = le décor qui dure • 
+                                        <span className="color-pc">Passé Composé</span> = l'action qui change tout !
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 11: Timeline Game
+                {
+                    type: 'exercise',
+                    exerciseType: 'timeline',
+                    title: "Jeu : Place les actions sur la ligne du temps"
+                },
+
+                // Slide 12: QCM Exercise 1
+                {
+                    type: 'exercise',
+                    exerciseType: 'qcm',
+                    title: "Exercice 1 : Choisis le bon temps",
+                    exercises: QCM_EXERCISES_1
+                },
+
+                // Slide 13: Transition visuelle
+                {
+                    type: 'simple',
+                    content: (
+                        <div className="text-center">
+                            <h2 className="text-4xl font-bold mb-8">Voyons la différence de manière plus visuelle ✈️</h2>
+                            <p className="text-xl text-gray-600">
+                                Avec l'exemple de l'atterrissage et du bruit...
+                            </p>
+                        </div>
+                    )
+                },
+
+                // Slides 14-17: Schémas visuels avion
+                {
+                    type: 'visual',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 text-center">Cas 1 : Imparfait + P. composé</h3>
+                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-lg">
+                                <p className="text-2xl mb-6 text-center">
+                                    Quand <span className="color-imp">nous atterrissions</span>, <span className="color-pc">nous avons entendu</span> un bruit.
+                                </p>
+                                
+                                <div className="bg-white p-6 rounded-lg mb-6">
+                                    <div className="relative h-96">
+                                        {/* BLOC 1 : Triangle + Texte P. composé EN HAUT */}
+                                        <div className="absolute left-[60%] top-0 transform -translate-x-1/2">
+                                            <div className="flex flex-col items-center">
+                                                {/* Emoji tout en haut */}
+                                                <div className="text-4xl mb-3">🔊</div>
+                                                
+                                                {/* Texte P. composé */}
+                                                <div className="text-center w-48">
+                                                    <div className="color-pc font-bold">Entendre (P. composé)</div>
+                                                    <div className="text-sm mt-1">2 secondes - action</div>
+                                                </div>
+                                                
+                                                {/* Triangle COLLÉ au texte */}
+                                                <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-blue-500 mt-2"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* BLOC 2 : Ligne orange */}
+                                        <div className="absolute left-[10%] right-[10%]" style={{top: '135px'}}>
+                                            <div className="relative h-1 bg-orange-500">
+                                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-3">
+                                                    <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-orange-500"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Avion ENTRE ligne et texte */}
+                                        <div className="absolute left-1/2 transform -translate-x-1/2" style={{top: '155px'}}>
+                                            <span className="text-4xl">✈️</span>
+                                        </div>
+                                        
+                                        {/* BLOC 3 : Texte imparfait EN DESSOUS */}
+                                        <div className="absolute left-[10%] right-[10%]" style={{top: '200px'}}>
+                                            <div className="text-center">
+                                                <div className="color-imp font-bold">Atterrir (imparfait)</div>
+                                                <div className="text-sm mt-1">3 minutes - contexte</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="text-center mt-6 p-4 bg-blue-50 rounded">
+                                        <p className="text-lg font-semibold">
+                                            Nous avons entendu un bruit à un instant précis (<span className="color-pc">P. composé</span>), pendant que l'avion atterrissait (<span className="color-imp">Imparfait</span>).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'visual',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 text-center">Cas 2 : P. composé + Imparfait</h3>
+                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-lg">
+                                <p className="text-2xl mb-6 text-center">
+                                    Quand <span className="color-pc">nous avons atterri</span>, <span className="color-imp">nous entendions</span> un bruit.
+                                </p>
+                                
+                                <div className="bg-white p-6 rounded-lg mb-6">
+                                    <div className="relative h-96">
+                                        {/* BLOC 1 : Triangle + Texte P. composé EN HAUT */}
+                                        <div className="absolute left-[60%] top-0 transform -translate-x-1/2">
+                                            <div className="flex flex-col items-center">
+                                                {/* Emoji tout en haut */}
+                                                <div className="text-4xl mb-3">✈️</div>
+                                                
+                                                {/* Texte P. composé */}
+                                                <div className="text-center w-48">
+                                                    <div className="color-pc font-bold">Atterrir (P. composé)</div>
+                                                    <div className="text-sm mt-1">3 minutes - action</div>
+                                                </div>
+                                                
+                                                {/* Triangle COLLÉ au texte */}
+                                                <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-blue-500 mt-2"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* BLOC 2 : Ligne orange */}
+                                        <div className="absolute left-[10%] right-[10%]" style={{top: '135px'}}>
+                                            <div className="relative h-1 bg-orange-500">
+                                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-3">
+                                                    <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-orange-500"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Emoji bruit ENTRE ligne et texte */}
+                                        <div className="absolute left-1/2 transform -translate-x-1/2" style={{top: '155px'}}>
+                                            <span className="text-4xl">🔊</span>
+                                        </div>
+                                        
+                                        {/* BLOC 3 : Texte imparfait EN DESSOUS */}
+                                        <div className="absolute left-[10%] right-[10%]" style={{top: '200px'}}>
+                                            <div className="text-center">
+                                                <div className="color-imp font-bold">Entendre un bruit (imparfait)</div>
+                                                <div className="text-sm mt-1">30 minutes - contexte</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="text-center mt-6 p-4 bg-orange-50 rounded">
+                                        <p className="text-lg font-semibold">
+                                            L'avion a atterri à un instant précis (<span className="color-pc">P. composé</span>), pendant que nous entendions un bruit (<span className="color-imp">Imparfait</span>).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'visual',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 text-center">Cas 3 : P. composé + P. composé</h3>
+                            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-lg">
+                                <p className="text-2xl mb-6 text-center">
+                                    Quand <span className="color-pc">nous avons atterri</span>, <span className="color-pc">nous avons entendu</span> un bruit.
+                                </p>
+                                
+                                <div className="bg-white p-6 rounded-lg mb-6">
+                                    <div className="relative" style={{height: '350px'}}>
+                                        {/* BLOC TRIANGLE 1 (ATTERRIR) - AU-DESSUS au centre */}
+                                        <div className="absolute transform -translate-x-1/2" style={{left: '50%', top: 0}}>
+                                            <div className="flex flex-col items-center">
+                                                <div className="text-4xl mb-3">✈️</div>
+                                                <div className="text-center w-48 mb-3">
+                                                    <div className="color-pc font-bold">Atterrir</div>
+                                                    <div className="text-sm mt-1">action</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Triangle 1 positionné ABSOLUMENT pour toucher la ligne à 150px */}
+                                        <div className="absolute transform -translate-x-1/2" style={{left: '50%', top: '120px'}}>
+                                            <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-blue-500"></div>
+                                        </div>
+                                        
+                                        {/* LIGNE ORANGE au milieu (150px) */}
+                                        <div className="absolute left-[10%] right-[10%]" style={{top: '150px'}}>
+                                            <div className="relative h-1 bg-orange-500">
+                                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-3">
+                                                    <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-orange-500"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* TRIANGLE 2 (ENTENDRE) - EN-DESSOUS au centre (50%) */}
+                                        <div className="absolute transform -translate-x-1/2" style={{left: '50%', top: '150px'}}>
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[30px] border-b-blue-500"></div>
+                                                <div style={{height: '12px'}}></div>
+                                                <div className="text-center w-48">
+                                                    <div className="color-pc font-bold">Entendre</div>
+                                                    <div className="text-sm mt-1">action</div>
+                                                </div>
+                                                <div className="text-4xl mt-3">🔊</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="text-center mt-6 p-4 bg-green-50 rounded">
+                                        <p className="text-lg font-semibold">
+                                            Le bruit et l'atterrissage sont courts et simultanés (<span className="color-pc">P. composé</span>). On insiste sur un moment bref.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'visual',
+                    content: (
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 text-center">Cas 4 : Imparfait + Imparfait</h3>
+                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-lg">
+                                <p className="text-2xl mb-6 text-center">
+                                    Quand <span className="color-imp">nous atterrissions</span>, <span className="color-imp">nous entendions</span> un bruit.
+                                </p>
+                                
+                                <div className="bg-white p-6 rounded-lg mb-6">
+                                    <div className="relative" style={{height: '350px'}}>
+                                        {/* BLOC 1 : Emoji + Texte AU-DESSUS de la première ligne */}
+                                        <div className="absolute left-1/2 transform -translate-x-1/2" style={{top: 0}}>
+                                            <div className="flex flex-col items-center">
+                                                <div className="text-4xl mb-3">✈️</div>
+                                                <div className="text-center w-48">
+                                                    <div className="color-imp font-bold">Atterrir (imparfait)</div>
+                                                    <div className="text-sm mt-1">contexte</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* LIGNE 1 ORANGE (atterrir) */}
+                                        <div className="absolute left-[10%] right-[10%]" style={{top: '120px'}}>
+                                            <div className="relative h-1 bg-orange-500">
+                                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-3">
+                                                    <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-orange-500"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* LIGNE 2 ORANGE (entendre) */}
+                                        <div className="absolute left-[10%] right-[10%]" style={{top: '200px'}}>
+                                            <div className="relative h-1 bg-orange-500">
+                                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-3">
+                                                    <div className="w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-orange-500"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* BLOC 2 : Emoji + Texte EN-DESSOUS de la deuxième ligne */}
+                                        <div className="absolute left-1/2 transform -translate-x-1/2" style={{top: '212px'}}>
+                                            <div className="flex flex-col items-center">
+                                                <div className="text-4xl mb-3">🔊</div>
+                                                <div className="text-center w-48">
+                                                    <div className="color-imp font-bold">Entendre un bruit (imparfait)</div>
+                                                    <div className="text-sm mt-1">contexte</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="text-center mt-6 p-4 bg-purple-50 rounded">
+                                        <p className="text-lg font-semibold">
+                                            Le bruit a duré pendant tout l'atterrissage (<span className="color-imp">Imparfait</span>). On insiste sur la durée des deux événements.
+                                        </p>
+                                        <p className="text-md mt-3 text-gray-600">
+                                            ⚠️ Ici, on attend un verbe au <span className="color-pc">passé composé</span> pour avoir une action, une histoire :<br/>
+                                            "Alors <span className="color-pc">j'ai appelé</span> l'hôtesse."
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 18: Drag & Drop Exercise
+                {
+                    type: 'exercise',
+                    exerciseType: 'dragdrop',
+                    title: "Exercice 2 : Associe les situations",
+                    exercise: DRAG_DROP_EXERCISE
+                },
+
+                // Slide 19: Récapitulatif 4 cas
+                {
+                    type: 'recap',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">Récapitulatif des 4 cas</h2>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="bg-blue-50 p-6 rounded-lg border-2 border-blue-300">
+                                    <h3 className="font-bold text-xl mb-3">1. <span className="color-imp">Imparfait</span> + <span className="color-pc">P. composé</span></h3>
+                                    <p>Description en cours + action courte qui arrive</p>
+                                </div>
+                                <div className="bg-orange-50 p-6 rounded-lg border-2 border-orange-300">
+                                    <h3 className="font-bold text-xl mb-3">2. <span className="color-pc">P. composé</span> + <span className="color-imp">Imparfait</span></h3>
+                                    <p>Action courte + contexte qui existait déjà</p>
+                                </div>
+                                <div className="bg-green-50 p-6 rounded-lg border-2 border-green-300">
+                                    <h3 className="font-bold text-xl mb-3">3. <span className="color-pc">P. composé</span> + <span className="color-pc">P. composé</span></h3>
+                                    <p>Deux actions courtes simultanées</p>
+                                </div>
+                                <div className="bg-purple-50 p-6 rounded-lg border-2 border-purple-300">
+                                    <h3 className="font-bold text-xl mb-3">4. <span className="color-imp">Imparfait</span> + <span className="color-imp">Imparfait</span></h3>
+                                    <p>Deux descriptions simultanées (+ besoin d'une action au P. composé)</p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 20: Fill-in Exercise
+                {
+                    type: 'exercise',
+                    exerciseType: 'fillin',
+                    title: "Exercice 3 : Complète les phrases",
+                    exercise: FILL_IN_EXERCISE
+                },
+
+                // Slides 21-22: Règles P. composé et Imparfait
+                {
+                    type: 'rules',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">
+                                Le <span className="color-pc">Passé Composé</span>
+                            </h2>
+                            <div className="bg-blue-50 p-8 rounded-lg">
+                                <div className="space-y-6">
+                                    <div className="bg-white p-6 rounded-lg shadow">
+                                        <h3 className="font-bold text-xl mb-3 color-pc">1. Action ponctuelle</h3>
+                                        <p className="text-gray-700">Il s'utilise pour une action courte et précise.</p>
+                                        <p className="mt-2 text-sm italic">Exemple : <span className="color-pc">J'ai mangé</span> une pomme.</p>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-lg shadow">
+                                        <h3 className="font-bold text-xl mb-3 color-pc">2. Début et fin identifiables</h3>
+                                        <p className="text-gray-700">L'action a un commencement et une fin clairs.</p>
+                                        <p className="mt-2 text-sm italic">Exemple : <span className="color-pc">Nous avons attendu</span> une heure.</p>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-lg shadow">
+                                        <h3 className="font-bold text-xl mb-3 color-pc">3. Implication dans le présent</h3>
+                                        <p className="text-gray-700">Le fait passé a des conséquences maintenant.</p>
+                                        <p className="mt-2 text-sm italic">Exemple : <span className="color-pc">Il s'est cassé</span> la jambe (il a encore mal).</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'rules',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">
+                                L'<span className="color-imp">Imparfait</span>
+                            </h2>
+                            <div className="bg-orange-50 p-8 rounded-lg">
+                                <div className="space-y-6">
+                                    <div className="bg-white p-6 rounded-lg shadow">
+                                        <h3 className="font-bold text-xl mb-3 color-imp">1. Durée, répétition, habitude</h3>
+                                        <p className="text-gray-700">Pour quelque chose qui dure ou se répète.</p>
+                                        <p className="mt-2 text-sm italic">Exemple : Avant, <span className="color-imp">je fumais</span>.</p>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-lg shadow">
+                                        <h3 className="font-bold text-xl mb-3 color-imp">2. Début et fin non définis</h3>
+                                        <p className="text-gray-700">On ne sait pas exactement quand ça a commencé ou fini.</p>
+                                        <p className="mt-2 text-sm italic">Exemple : <span className="color-imp">Il faisait</span> beau.</p>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-lg shadow">
+                                        <h3 className="font-bold text-xl mb-3 color-imp">3. Contexte d'une action au P. composé</h3>
+                                        <p className="text-gray-700">Décrit le décor, la situation.</p>
+                                        <p className="mt-2 text-sm italic">Exemple : <span className="color-imp">Il faisait</span> beau quand 
+                                        <span className="color-pc">je suis sorti</span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 23: Tableau comparatif
+                {
+                    type: 'comparison',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">Tableau comparatif</h2>
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                                            <th className="border p-4 text-left">Critère</th>
+                                            <th className="border p-4 text-left"><span className="color-pc" style={{color: 'white'}}>Passé Composé</span></th>
+                                            <th className="border p-4 text-left"><span className="color-imp" style={{color: 'white'}}>Imparfait</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        <tr>
+                                            <td className="border p-4 font-semibold">Durée</td>
+                                            <td className="border p-4 bg-blue-50">Action courte, ponctuelle</td>
+                                            <td className="border p-4 bg-orange-50">Description, continue</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="border p-4 font-semibold">Limites temporelles</td>
+                                            <td className="border p-4 bg-blue-50">Début et fin clairs</td>
+                                            <td className="border p-4 bg-orange-50">Limites floues ou inexistantes</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="border p-4 font-semibold">Usage dans le récit</td>
+                                            <td className="border p-4 bg-blue-50">Les actions, les événements</td>
+                                            <td className="border p-4 bg-orange-50">Le décor, le contexte</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="border p-4 font-semibold">Répétition</td>
+                                            <td className="border p-4 bg-blue-50">Action unique</td>
+                                            <td className="border p-4 bg-orange-50">Habitudes, actions répétées</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="border p-4 font-semibold">Exemple</td>
+                                            <td className="border p-4 bg-blue-50"><span className="color-pc">J'ai mangé</span></td>
+                                            <td className="border p-4 bg-orange-50"><span className="color-imp">Je mangeais</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 24: Input Exercise 1
+                {
+                    type: 'exercise',
+                    exerciseType: 'input',
+                    title: "Exercice 4 : Conjugue au bon temps",
+                    exercises: INPUT_EXERCISES_1
+                },
+
+                // Slides 25-26: Marqueurs temporels
+                {
+                    type: 'markers',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">
+                                Marqueurs temporels du <span className="color-pc">Passé Composé</span>
+                            </h2>
+                            <div className="bg-blue-50 p-8 rounded-lg">
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    {[
+                                        'hier', 'la semaine dernière', 'l\'année dernière', 
+                                        'il y a (2 jours)', 'ce matin', 'à ce moment-là',
+                                        'soudain', 'tout à coup', 'un jour',
+                                        'puis', 'ensuite', 'finalement'
+                                    ].map((marker, idx) => (
+                                        <div key={idx} className="bg-white p-4 rounded-lg shadow text-center font-semibold">
+                                            {marker}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                {
+                    type: 'markers',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">
+                                Marqueurs temporels de l'<span className="color-imp">Imparfait</span>
+                            </h2>
+                            <div className="bg-orange-50 p-8 rounded-lg">
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    {[
+                                        'avant', 'autrefois', 'dans le temps',
+                                        'quand j\'étais petit', 'tous les jours', 'chaque semaine',
+                                        'souvent', 'toujours', 'habituellement',
+                                        'pendant que', 'tandis que', 'en général'
+                                    ].map((marker, idx) => (
+                                        <div key={idx} className="bg-white p-4 rounded-lg shadow text-center font-semibold">
+                                            {marker}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 27: Actions simultanées
+                {
+                    type: 'concept',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">Actions simultanées</h2>
+                            <div className="space-y-6">
+                                <div className="bg-gradient-to-r from-blue-50 to-orange-50 p-8 rounded-lg">
+                                    <h3 className="font-bold text-xl mb-4">Cas 1 : Deux actions en cours</h3>
+                                    <p className="text-lg mb-2">
+                                        Pendant que <span className="color-imp">je regardais</span> la télé, 
+                                        mon frère <span className="color-imp">jouait</span> aux jeux vidéo.
+                                    </p>
+                                    <p className="text-gray-600 text-sm">→ Les deux actions duraient en même temps (imparfait + imparfait)</p>
+                                </div>
+
+                                <div className="bg-gradient-to-r from-orange-50 to-blue-50 p-8 rounded-lg">
+                                    <h3 className="font-bold text-xl mb-4">Cas 2 : Une action interrompt l'autre</h3>
+                                    <p className="text-lg mb-2">
+                                        Pendant que <span className="color-imp">je regardais</span> la télé, 
+                                        le téléphone <span className="color-pc">a sonné</span>.
+                                    </p>
+                                    <p className="text-gray-600 text-sm">→ L'description (imparfait) est interrompue par l'action courte (P. composé)</p>
+                                </div>
+
+                                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-8 rounded-lg">
+                                    <h3 className="font-bold text-xl mb-4">Cas 3 : Deux actions brèves</h3>
+                                    <p className="text-lg mb-2">
+                                        Quand <span className="color-pc">j'ai ouvert</span> la porte, 
+                                        <span className="color-pc">j'ai vu</span> mon ami.
+                                    </p>
+                                    <p className="text-gray-600 text-sm">→ Deux actions courtes et rapprochées (PC + PC)</p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 28: Input Exercise 2
+                {
+                    type: 'exercise',
+                    exerciseType: 'input',
+                    title: "Exercice 5 : Conjugue au bon temps",
+                    exercises: INPUT_EXERCISES_2
+                },
+
+                // Slide 29: Contexte et action
+                {
+                    type: 'concept',
+                    content: (
+                        <div>
+                            <h2 className="text-3xl font-bold mb-8 text-center">Le contexte et l'action</h2>
+                            <div className="space-y-6">
+                                <div className="bg-gradient-to-br from-orange-100 to-orange-50 p-8 rounded-lg">
+                                    <h3 className="font-bold text-2xl mb-4 text-center">
+                                        <span className="color-imp">Imparfait</span> = Le décor, le contexte
+                                    </h3>
+                                    <ul className="space-y-3 text-lg">
+                                        <li>• Description physique : <span className="color-imp">Elle était</span> grande et blonde.</li>
+                                        <li>• Description mentale : <span className="color-imp">J'étais</span> content.</li>
+                                        <li>• Météo : <span className="color-imp">Il pleuvait</span>.</li>
+                                        <li>• Heure : <span className="color-imp">Il était</span> 8 heures.</li>
+                                        <li>• Âge : <span className="color-imp">J'avais</span> 20 ans.</li>
+                                    </ul>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-blue-100 to-blue-50 p-8 rounded-lg">
+                                    <h3 className="font-bold text-2xl mb-4 text-center">
+                                        <span className="color-pc">Passé Composé</span> = L'action, l'événement
+                                    </h3>
+                                    <ul className="space-y-3 text-lg">
+                                        <li>• Actions accomplies : <span className="color-pc">J'ai mangé</span>, <span className="color-pc">je suis parti</span>.</li>
+                                        <li>• Événements ponctuels : <span className="color-pc">Le téléphone a sonné</span>.</li>
+                                        <li>• Changements d'état : <span className="color-pc">Je suis devenu</span> professeur.</li>
+                                        <li>• Réactions : <span className="color-pc">J'ai eu</span> peur.</li>
+                                    </ul>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-purple-100 to-pink-50 p-8 rounded-lg border-4 border-purple-400">
+                                    <p className="text-xl text-center font-bold">
+                                        Dans un récit : <span className="color-imp">IMPARFAIT</span> = décor / 
+                                        <span className="color-pc">PASSÉ COMPOSÉ</span> = histoire
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+
+                // Slide 31: Text Analysis Exercise
+                {
+                    type: 'exercise',
+                    exerciseType: 'textanalysis',
+                    title: "Exercice 7 : Analyse de texte",
+                    exercise: TEXT_ANALYSIS
+                },
+
+                // Slide 32: Conclusion
+                {
+                    type: 'conclusion',
+                    content: (
+                        <div className="text-center">
+                            <div className="text-8xl mb-8">🎉</div>
+                            <h1 className="text-5xl font-bold mb-8">Félicitations !</h1>
+                            <p className="text-2xl text-gray-700 mb-8">
+                                Tu as terminé le tutoriel sur le passé composé et l'imparfait !
+                            </p>
+                            
+                            <div className="bg-gradient-to-r from-blue-50 to-orange-50 p-8 rounded-lg max-w-2xl mx-auto mb-8">
+                                <h2 className="text-2xl font-bold mb-4">Récapitulatif</h2>
+                                <div className="text-left space-y-3">
+                                    <p>✅ <span className="color-pc">Passé Composé</span> : Actions ponctuelles, avec début et fin</p>
+                                    <p>✅ <span className="color-imp">Imparfait</span> : Durée, habitudes, contexte</p>
+                                    <p>✅ Dans un récit : Imparfait = décor, P. composé = action</p>
+                                    <p>✅ Marqueurs temporels pour t'aider à choisir</p>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => onNavigate('practice')}
+                                className="btn-primary text-white px-12 py-4 rounded-xl font-bold text-xl hover:scale-105 transition-all"
+                            >
+                                Passer à la pratique 💪
+                            </button>
+                        </div>
+                    )
+                }
+            ];
+
+            const handleNext = () => {
+                if (currentSlide < slides.length - 1) {
+                    setCurrentSlide(currentSlide + 1);
+                }
+            };
+
+            const handlePrevious = () => {
+                if (currentSlide > 0) {
+                    setCurrentSlide(currentSlide - 1);
+                }
+            };
+
+            const currentSlideData = slides[currentSlide];
+
+            return (
+                <div className="min-h-screen p-4">
+                    <div className="max-w-6xl mx-auto">
+                        {/* En-tête */}
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => onNavigate('home')}
+                                    className="px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                                >
+                                    🏠 Menu
+                                </button>
+                                
+                                {/* Input caché pour sauter aux slides - rectangle discret */}
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max={slides.length}
+                                    className="w-12 h-10 bg-gray-200 bg-opacity-30 rounded text-center text-sm outline-none border-0"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            const slideNum = parseInt(e.target.value);
+                                            if (slideNum >= 1 && slideNum <= slides.length) {
+                                                setCurrentSlide(slideNum - 1);
+                                                e.target.value = '';
+                                            }
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <div className="text-white font-bold text-lg">
+                                Slide {currentSlide + 1} / {slides.length}
+                            </div>
+                        </div>
+
+                        {/* Contenu du slide */}
+                        <div className="card p-8 mb-6 min-h-[500px] slide-enter">
+                            {currentSlideData.type === 'exercise' ? (
+                                currentSlideData.exerciseType === 'interactive-text' ? (
+                                    <InteractiveTextIdentification
+                                        onComplete={() => handleNext()}
+                                        onPrevious={() => handlePrevious()}
+                                    />
+                                ) : currentSlideData.exerciseType === 'qcm' ? (
+                                    <QCMExercise
+                                        exercises={currentSlideData.exercises}
+                                        onComplete={() => handleNext()}
+                                        onPrevious={() => handlePrevious()}
+                                        title={currentSlideData.title}
+                                    />
+                                ) : currentSlideData.exerciseType === 'input' ? (
+                                    <InputExercise
+                                        exercises={currentSlideData.exercises}
+                                        onComplete={() => handleNext()}
+                                        onPrevious={() => handlePrevious()}
+                                        title={currentSlideData.title}
+                                    />
+                                ) : currentSlideData.exerciseType === 'timeline' ? (
+                                    <TimelineGame
+                                        onComplete={() => handleNext()}
+                                        onPrevious={() => handlePrevious()}
+                                    />
+                                ) : currentSlideData.exerciseType === 'dragdrop' ? (
+                                    <DragDropExercise
+                                        exercise={currentSlideData.exercise}
+                                        onComplete={() => handleNext()}
+                                        onPrevious={() => handlePrevious()}
+                                    />
+                                ) : currentSlideData.exerciseType === 'fillin' ? (
+                                    <FillInExercise
+                                        exercise={currentSlideData.exercise}
+                                        onComplete={() => handleNext()}
+                                        onPrevious={() => handlePrevious()}
+                                    />
+                                ) : currentSlideData.exerciseType === 'textanalysis' ? (
+                                    <TextAnalysisExercise
+                                        exercise={currentSlideData.exercise}
+                                        onComplete={() => handleNext()}
+                                        onPrevious={() => handlePrevious()}
+                                    />
+                                ) : null
+                            ) : (
+                                currentSlideData.content
+                            )}
+                        </div>
+
+                        {/* Navigation (sauf pour les exercices qui ont leur propre navigation) */}
+                        {currentSlideData.type !== 'exercise' && (
+                            <div className="flex justify-between">
+                                <button
+                                    onClick={handlePrevious}
+                                    disabled={currentSlide === 0}
+                                    className={`px-6 py-3 rounded-lg font-semibold ${
+                                        currentSlide === 0
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-white hover:bg-gray-100'
+                                    }`}
+                                >
+                                    ← Précédent
+                                </button>
+                                
+                                <button
+                                    onClick={handleNext}
+                                    disabled={currentSlide === slides.length - 1}
+                                    className={`px-6 py-3 rounded-lg font-semibold ${
+                                        currentSlide === slides.length - 1
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'btn-primary text-white'
+                                    }`}
+                                >
+                                    Suivant →
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: REFERENCE TABLE
+        // ============================================
+
+        const ReferenceTable = ({ onNavigate }) => {
+            return (
+                <div className="min-h-screen p-4">
+                    <div className="max-w-6xl mx-auto">
+                        <button
+                            onClick={() => onNavigate('home')}
+                            className="mb-6 px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                        >
+                            🏠 Retour au menu
+                        </button>
+
+                        <div className="card p-8 slide-enter">
+                            <h1 className="text-4xl font-bold text-center mb-8">
+                                📊 Tableau de référence : P. composé vs Imparfait
+                            </h1>
+
+                            {/* Section 1 */}
+                            <div className="mb-8 bg-blue-50 p-6 rounded-lg">
+                                <h2 className="text-2xl font-bold mb-4 color-pc">Quand utiliser le Passé Composé ?</h2>
+                                <ul className="space-y-2 text-lg">
+                                    <li>✅ Actions ponctuelles, courtes</li>
+                                    <li>✅ Début et fin bien identifiables</li>
+                                    <li>✅ Événements qui font avancer l'histoire</li>
+                                    <li>✅ Actions uniques, non répétées</li>
+                                    <li>✅ Changements d'état soudains</li>
+                                </ul>
+                            </div>
+
+                            {/* Section 2 */}
+                            <div className="mb-8 bg-orange-50 p-6 rounded-lg">
+                                <h2 className="text-2xl font-bold mb-4 color-imp">Quand utiliser l'Imparfait ?</h2>
+                                <ul className="space-y-2 text-lg">
+                                    <li>✅ Actions longues, continues</li>
+                                    <li>✅ Habitudes, actions répétées</li>
+                                    <li>✅ Descriptions (personnes, lieux, météo)</li>
+                                    <li>✅ Contexte, décor de l'histoire</li>
+                                    <li>✅ Actions simultanées</li>
+                                </ul>
+                            </div>
+
+                            {/* Section 3 */}
+                            <div className="mb-8 bg-green-50 p-6 rounded-lg">
+                                <h2 className="text-2xl font-bold mb-4">Marqueurs temporels</h2>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 className="font-bold mb-2 color-pc">Passé Composé :</h3>
+                                        <p>hier, soudain, un jour, puis, enfin, à ce moment-là</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold mb-2 color-imp">Imparfait :</h3>
+                                        <p>avant, toujours, souvent, chaque jour, pendant que, tandis que</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 4 */}
+                            <div className="mb-8 bg-purple-50 p-6 rounded-lg">
+                                <h2 className="text-2xl font-bold mb-4">Les 4 schémas temporels</h2>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div className="bg-white p-4 rounded">
+                                        <p className="font-bold mb-2">1. <span className="color-imp">IMP</span> + <span className="color-pc">P. composé</span></p>
+                                        <p className="text-sm">Description + action courte</p>
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <p className="font-bold mb-2">2. <span className="color-pc">P. composé</span> + <span className="color-imp">IMP</span></p>
+                                        <p className="text-sm">Action courte + contexte</p>
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <p className="font-bold mb-2">3. <span className="color-pc">P. composé</span> + <span className="color-pc">P. composé</span></p>
+                                        <p className="text-sm">Deux actions courtes</p>
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <p className="font-bold mb-2">4. <span className="color-imp">IMP</span> + <span className="color-imp">IMP</span></p>
+                                        <p className="text-sm">Deux actions longues</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 5 */}
+                            <div className="mb-8 bg-yellow-50 p-6 rounded-lg">
+                                <h2 className="text-2xl font-bold mb-4">Exemples clés</h2>
+                                <div className="space-y-3">
+                                    <p>• <span className="color-imp">Il faisait</span> beau quand <span className="color-pc">je suis sorti</span>.</p>
+                                    <p>• <span className="color-imp">J'avais</span> rendez-vous donc <span className="color-pc">je suis parti</span>.</p>
+                                    <p>• Avant, <span className="color-imp">je fumais</span>, mais <span className="color-pc">j'ai arrêté</span>.</p>
+                                    <p>• <span className="color-imp">Ils regardaient</span> la télé quand <span className="color-pc">le téléphone a sonné</span>.</p>
+                                </div>
+                            </div>
+
+                            {/* Section 6 */}
+                            <div className="bg-red-50 p-6 rounded-lg border-2 border-red-300">
+                                <h2 className="text-2xl font-bold mb-4">⚠️ Pièges à éviter</h2>
+                                <ul className="space-y-2">
+                                    <li>❌ Ne pas confondre durée et répétition avec action ponctuelle</li>
+                                    <li>❌ Attention aux verbes qui changent de sens (avoir, être, savoir...)</li>
+                                    <li>❌ Dans "IMP + IMP", il faut souvent ajouter une action au P. composé.</li>
+                                    <li>❌ Les marqueurs temporels ne sont que des indices, pas des règles absolues</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: PRACTICE SCREEN
+        // ============================================
+
+        const PracticeScreen = ({ onNavigate }) => {
+            const [completedSeries, setCompletedSeries] = useState([]);
+            const [currentSeries, setCurrentSeries] = useState(null);
+            const [totalScore, setTotalScore] = useState(0);
+            const [showFinalModal, setShowFinalModal] = useState(false);
+
+            const practiceSeries = [
+                { id: 'A', title: 'Série A : Reconnaissance (QCM)', type: 'qcm', exercises: QCM_EXERCISES_1 },
+                { id: 'B', title: 'Série B : Conjugaison (Input)', type: 'input', exercises: INPUT_EXERCISES_2 }
+            ];
+
+            const handleSeriesComplete = (score) => {
+                setCompletedSeries([...completedSeries, currentSeries.id]);
+                setTotalScore(totalScore + score);
+                setCurrentSeries(null);
+
+                if (completedSeries.length + 1 === practiceSeries.length) {
+                    setTimeout(() => setShowFinalModal(true), 500);
+                }
+            };
+
+            if (currentSeries) {
+                return (
+                    <div className="min-h-screen p-4">
+                        <div className="max-w-6xl mx-auto">
+                            <div className="flex justify-between items-center mb-6">
+                                <button
+                                    onClick={() => setCurrentSeries(null)}
+                                    className="px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                                >
+                                    ← Retour aux séries
+                                </button>
+                                <div className="text-white font-bold">Score total : {totalScore}</div>
+                            </div>
+
+                            <div className="card p-8">
+                                <h2 className="text-3xl font-bold mb-8 text-center">{currentSeries.title}</h2>
+                                {currentSeries.type === 'qcm' && (
+                                    <QCMExercise
+                                        exercises={currentSeries.exercises}
+                                        onComplete={handleSeriesComplete}
+                                        title={currentSeries.title}
+                                    />
+                                )}
+                                {currentSeries.type === 'input' && (
+                                    <InputExercise
+                                        exercises={currentSeries.exercises}
+                                        onComplete={handleSeriesComplete}
+                                        title={currentSeries.title}
+                                    />
+                                )}
+                                {currentSeries.type === 'textanalysis' && (
+                                    <TextAnalysisExercise
+                                        exercise={currentSeries.exercise}
+                                        onComplete={handleSeriesComplete}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen p-4">
+                    <div className="max-w-4xl mx-auto">
+                        <button
+                            onClick={() => onNavigate('home')}
+                            className="mb-6 px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                        >
+                            🏠 Retour au menu
+                        </button>
+
+                        <div className="card p-8 slide-enter">
+                            <h1 className="text-4xl font-bold text-center mb-8">💪 Un peu de pratique</h1>
+                            <p className="text-center text-gray-600 mb-8 text-lg">
+                                Choisis une série d'exercices pour t'entraîner !
+                            </p>
+
+                            <div className="space-y-6">
+                                {practiceSeries.map(series => (
+                                    <div
+                                        key={series.id}
+                                        className={`p-6 rounded-lg border-2 transition-all ${
+                                            completedSeries.includes(series.id)
+                                                ? 'bg-green-50 border-green-500'
+                                                : 'bg-gray-50 border-gray-300 hover:border-purple-500'
+                                        }`}
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h3 className="text-xl font-bold mb-2">{series.title}</h3>
+                                                {completedSeries.includes(series.id) && (
+                                                    <span className="text-green-600 font-semibold">✅ Complétée</span>
+                                                )}
+                                            </div>
+                                            <button
+                                                onClick={() => setCurrentSeries(series)}
+                                                className={`px-6 py-3 rounded-lg font-bold ${
+                                                    completedSeries.includes(series.id)
+                                                        ? 'bg-gray-300 hover:bg-gray-400'
+                                                        : 'btn-primary text-white'
+                                                }`}
+                                            >
+                                                {completedSeries.includes(series.id) ? 'Refaire' : 'Commencer'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {completedSeries.length > 0 && (
+                                <div className="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg text-center">
+                                    <div className="text-3xl font-bold">
+                                        Score total : {totalScore}
+                                    </div>
+                                    <div className="text-gray-600 mt-2">
+                                        {completedSeries.length} / {practiceSeries.length} séries complétées
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Modal final */}
+                    {showFinalModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="card p-12 max-w-2xl text-center slide-enter">
+                                <div className="dancing-person mb-6">🕺</div>
+                                <h2 className="text-4xl font-bold mb-4">C'est bien !</h2>
+                                <p className="text-2xl mb-6">
+                                    Tu as fini ce module sur le <span className="color-pc">Passé Composé</span> et l'<span className="color-imp">Imparfait</span> !
+                                </p>
+                                
+                                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-8 rounded-xl mb-6">
+                                    <div className="text-5xl font-bold mb-2">{totalScore}</div>
+                                    <div className="text-xl">Score total</div>
+                                </div>
+
+                                <p className="text-xl text-gray-600 mb-8">
+                                    Prochaine étape : Continue à pratiquer avec des textes authentiques !
+                                </p>
+
+                                <button
+                                    onClick={() => {
+                                        setShowFinalModal(false);
+                                        onNavigate('home');
+                                    }}
+                                    className="btn-primary text-white px-12 py-4 rounded-xl font-bold text-xl"
+                                >
+                                    Retour au menu
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT PRINCIPAL: APP
+        // ============================================
+
+        const App = () => {
+            const [currentScreen, setCurrentScreen] = useState('home');
+
+            return (
+                <div>
+                    {currentScreen === 'home' && <HomeScreen onNavigate={setCurrentScreen} />}
+                    {currentScreen === 'tutorial' && <TutorialScreen onNavigate={setCurrentScreen} />}
+                    {currentScreen === 'reference' && <ReferenceTable onNavigate={setCurrentScreen} />}
+                    {currentScreen === 'practice' && <PracticeScreen onNavigate={setCurrentScreen} />}
+                </div>
+            );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
