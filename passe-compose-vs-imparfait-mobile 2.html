@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Passé Composé vs Imparfait - Version Mobile</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap');
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: 'Merriweather', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .color-pc {
+            color: #3B82F6;
+            font-weight: 700;
+        }
+        
+        .color-imp {
+            color: #F97316;
+            font-weight: 700;
+        }
+        
+        .color-context {
+            color: #10B981;
+            font-weight: 700;
+        }
+        
+        .color-action {
+            color: #DC2626;
+            font-weight: 700;
+        }
+
+        .highlight-pc {
+            background-color: #DBEAFE;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #1E40AF;
+            font-weight: 600;
+        }
+
+        .highlight-imp {
+            background-color: #FFEDD5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #C2410C;
+            font-weight: 600;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes dance {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(-10deg); }
+            75% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .dancing-person {
+            animation: dance 0.6s ease-in-out infinite;
+            display: inline-block;
+            font-size: 3rem;
+        }
+        
+        @media (min-width: 640px) {
+            .dancing-person {
+                font-size: 4rem;
+            }
+        }
+
+        .slide-enter {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .badge-pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Mono', monospace;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            min-height: 50px;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .timeline {
+            position: relative;
+            background: linear-gradient(90deg, transparent 49%, #3B82F6 49%, #3B82F6 51%, transparent 51%);
+            height: 4px;
+            margin: 20px 0;
+        }
+
+        .timeline-point {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #DC2626;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #DC2626;
+        }
+
+        .clickable-word {
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 4px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 2px;
+            min-height: 32px;
+            line-height: 1.5;
+        }
+
+        .clickable-word:hover {
+            background-color: #FEF3C7;
+        }
+
+        .clickable-word.found-pc {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+            font-weight: 600;
+        }
+
+        .clickable-word.found-imp {
+            background-color: #FFEDD5;
+            color: #C2410C;
+            font-weight: 600;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type="number"], input[type="text"] {
+            -moz-appearance: textfield;
+            min-height: 50px;
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        button {
+            min-height: 50px;
+            font-size: 1rem;
+        }
+        
+        .option-button {
+            min-height: 60px;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+        
+        @media (min-width: 640px) {
+            input[type="number"], input[type="text"] {
+                font-size: 1.125rem;
+            }
+            
+            button {
+                font-size: 1.125rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ============================================
+        // DONNÉES DES EXERCICES
+        // ============================================
+
+        const QCM_EXERCISES_1 = [
+            {
+                id: 1,
+                question: "Quand il est arrivé, tout le monde _____ : c'était son anniversaire.",
+                options: ["a applaudi", "applaudissait"],
+                correct: "a applaudi",
+                explanation: "Action ponctuelle (début d'action) → P. Composé"
+            },
+            {
+                id: 2,
+                question: "Hier, il _____ beau toute la journée.",
+                options: ["a fait", "faisait"],
+                correct: "faisait",
+                explanation: "Description continue dans le passé → Imparfait"
+            },
+            {
+                id: 3,
+                question: "Quand j'étais jeune, je _____ au tennis tous les samedis.",
+                options: ["ai joué", "jouais"],
+                correct: "jouais",
+                explanation: "Habitude passée → Imparfait"
+            },
+            {
+                id: 4,
+                question: "Pendant que je _____, le téléphone a sonné.",
+                options: ["ai cuisiné", "cuisinais"],
+                correct: "cuisinais",
+                explanation: "Action en cours interrompue → Imparfait"
+            },
+            {
+                id: 5,
+                question: "Elle _____ trois fois à Paris dans sa vie.",
+                options: ["est allée", "allait"],
+                correct: "est allée",
+                explanation: "Nombre de fois précis → P. Composé"
+            }
+        ];
+
+        const INPUT_EXERCISES_2 = [
+            {
+                id: 1,
+                sentence: "Quand j'_____ (être) petit, je _____ (jouer) souvent dans le parc.",
+                answers: [["étais"], ["jouais"]],
+                explanation: "Deux habitudes passées → Imparfait"
+            },
+            {
+                id: 2,
+                sentence: "Hier, nous _____ (aller) au cinéma et nous _____ (voir) un bon film.",
+                answers: [["sommes allés", "sommes allées"], ["avons vu"]],
+                explanation: "Deux actions ponctuelles hier → P. Composé"
+            },
+            {
+                id: 3,
+                sentence: "Il _____ (pleuvoir) quand je _____ (sortir) de la maison.",
+                answers: [["pleuvait"], ["suis sorti", "suis sortie"]],
+                explanation: "Contexte (pleuvoir) + action (sortir)"
+            },
+            {
+                id: 4,
+                sentence: "Elle _____ (avoir) 20 ans quand elle _____ (rencontrer) son mari.",
+                answers: [["avait"], ["a rencontré"]],
+                explanation: "État/âge (avoir) + événement (rencontrer)"
+            },
+            {
+                id: 5,
+                sentence: "Pendant que tu _____ (dormir), quelqu'un _____ (frapper) à la porte.",
+                answers: [["dormais"], ["a frappé"]],
+                explanation: "Action en cours + interruption"
+            }
+        ];
+
+        const TEXT_ANALYSIS = {
+            title: "Analyse de texte : Identifie les temps",
+            text: "Hier, il faisait très beau. J'ai décidé de sortir. Pendant que je marchais dans le parc, j'ai rencontré mon ami Paul. Il portait un nouveau chapeau. Nous avons parlé pendant une heure.",
+            verbs: [
+                { word: "faisait", type: "imp", position: 0 },
+                { word: "ai décidé", type: "pc", position: 1 },
+                { word: "marchais", type: "imp", position: 2 },
+                { word: "ai rencontré", type: "pc", position: 3 },
+                { word: "portait", type: "imp", position: 4 },
+                { word: "avons parlé", type: "pc", position: 5 }
+            ]
+        };
+
+        // ============================================
+        // COMPOSANT: HOME SCREEN
+        // ============================================
+
+        const HomeScreen = ({ onNavigate }) => {
+            return (
+                <div className="min-h-screen p-4 sm:p-8">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="card p-6 sm:p-12 slide-enter">
+                            <h1 className="text-3xl sm:text-5xl font-bold text-center mb-4 sm:mb-6">
+                                Passé Composé vs Imparfait
+                            </h1>
+                            <p className="text-center text-base sm:text-xl text-gray-600 mb-8 sm:mb-12">
+                                Apprends à choisir le bon temps du passé
+                            </p>
+
+                            <div className="space-y-4 sm:space-y-6">
+                                <button
+                                    onClick={() => onNavigate('tutorial')}
+                                    className="w-full p-4 sm:p-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-bold text-lg sm:text-2xl hover:shadow-2xl transition"
+                                >
+                                    📚 Tutoriel interactif
+                                </button>
+
+                                <button
+                                    onClick={() => onNavigate('reference')}
+                                    className="w-full p-4 sm:p-6 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-bold text-lg sm:text-2xl hover:shadow-2xl transition"
+                                >
+                                    📊 Tableau de référence
+                                </button>
+
+                                <button
+                                    onClick={() => onNavigate('practice')}
+                                    className="w-full p-4 sm:p-6 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-bold text-lg sm:text-2xl hover:shadow-2xl transition"
+                                >
+                                    💪 Exercices pratiques
+                                </button>
+                            </div>
+
+                            <p className="text-center text-gray-500 italic mt-8 sm:mt-12 text-sm sm:text-base">
+                                par Benoit Cassagnau
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: TUTORIAL SCREEN
+        // ============================================
+
+        const TutorialScreen = ({ onNavigate }) => {
+            const [currentStep, setCurrentStep] = useState(0);
+
+            const steps = [
+                {
+                    title: "Le Passé Composé",
+                    content: (
+                        <div className="space-y-4 sm:space-y-6">
+                            <div className="bg-blue-50 p-4 sm:p-6 rounded-xl">
+                                <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 color-pc">
+                                    Quand utiliser le Passé Composé ?
+                                </h3>
+                                <ul className="space-y-2 sm:space-y-3 text-base sm:text-lg">
+                                    <li>✅ Action ponctuelle et terminée</li>
+                                    <li>✅ Événement unique dans le passé</li>
+                                    <li>✅ Action avec début et fin clairs</li>
+                                    <li>✅ Suite d'actions</li>
+                                </ul>
+                            </div>
+                            <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-blue-300">
+                                <p className="text-lg sm:text-xl font-bold mb-3">Exemples :</p>
+                                <p className="text-base sm:text-lg mb-2">
+                                    Hier, j'<span className="highlight-pc">ai mangé</span> une pizza.
+                                </p>
+                                <p className="text-base sm:text-lg">
+                                    Elle <span className="highlight-pc">est allée</span> au cinéma trois fois.
+                                </p>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "L'Imparfait",
+                    content: (
+                        <div className="space-y-4 sm:space-y-6">
+                            <div className="bg-orange-50 p-4 sm:p-6 rounded-xl">
+                                <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 color-imp">
+                                    Quand utiliser l'Imparfait ?
+                                </h3>
+                                <ul className="space-y-2 sm:space-y-3 text-base sm:text-lg">
+                                    <li>✅ Description dans le passé</li>
+                                    <li>✅ Habitude passée</li>
+                                    <li>✅ Action en cours (sans début ni fin)</li>
+                                    <li>✅ Contexte, arrière-plan</li>
+                                </ul>
+                            </div>
+                            <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-orange-300">
+                                <p className="text-lg sm:text-xl font-bold mb-3">Exemples :</p>
+                                <p className="text-base sm:text-lg mb-2">
+                                    Il <span className="highlight-imp">faisait</span> beau.
+                                </p>
+                                <p className="text-base sm:text-lg">
+                                    Quand j'étais jeune, je <span className="highlight-imp">jouais</span> au football.
+                                </p>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "La règle d'or",
+                    content: (
+                        <div className="space-y-4 sm:space-y-6">
+                            <div className="bg-gradient-to-r from-blue-50 to-orange-50 p-4 sm:p-6 rounded-xl">
+                                <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center">
+                                    🎬 Pense à un film !
+                                </h3>
+                                <div className="space-y-4 sm:space-y-6">
+                                    <div className="bg-white p-4 sm:p-6 rounded-xl">
+                                        <p className="font-bold text-lg sm:text-xl mb-2 color-imp">
+                                            Imparfait = Le décor 🎨
+                                        </p>
+                                        <p className="text-base sm:text-lg">
+                                            Le contexte, l'ambiance, ce qui était déjà là
+                                        </p>
+                                    </div>
+                                    <div className="bg-white p-4 sm:p-6 rounded-xl">
+                                        <p className="font-bold text-lg sm:text-xl mb-2 color-pc">
+                                            Passé Composé = L'action 🎬
+                                        </p>
+                                        <p className="text-base sm:text-lg">
+                                            Ce qui se passe, les événements
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-purple-50 p-4 sm:p-6 rounded-xl">
+                                <p className="text-lg sm:text-xl font-bold mb-3">Exemple complet :</p>
+                                <p className="text-base sm:text-lg leading-relaxed">
+                                    Il <span className="highlight-imp">faisait</span> beau (décor). 
+                                    Les oiseaux <span className="highlight-imp">chantaient</span> (décor). 
+                                    Soudain, le téléphone <span className="highlight-pc">a sonné</span> (action !).
+                                </p>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Les marqueurs temporels",
+                    content: (
+                        <div className="space-y-4 sm:space-y-6">
+                            <div className="bg-blue-50 p-4 sm:p-6 rounded-xl">
+                                <p className="font-bold text-lg sm:text-xl mb-3 color-pc">
+                                    Indices du Passé Composé :
+                                </p>
+                                <div className="flex flex-wrap gap-2 sm:gap-3">
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">hier</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">soudain</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">tout à coup</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">une fois</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">d'abord</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">puis</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">ensuite</span>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-orange-50 p-4 sm:p-6 rounded-xl">
+                                <p className="font-bold text-lg sm:text-xl mb-3 color-imp">
+                                    Indices de l'Imparfait :
+                                </p>
+                                <div className="flex flex-wrap gap-2 sm:gap-3">
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">toujours</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">souvent</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">tous les jours</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">chaque</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">pendant que</span>
+                                    <span className="px-3 sm:px-4 py-2 bg-white rounded-lg text-sm sm:text-base">autrefois</span>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-400">
+                                <p className="text-sm sm:text-base font-semibold">
+                                    ⚠️ Attention : ces marqueurs sont des indices, pas des règles absolues !
+                                </p>
+                            </div>
+                        </div>
+                    )
+                }
+            ];
+
+            return (
+                <div className="min-h-screen p-4 sm:p-8">
+                    <div className="max-w-3xl mx-auto">
+                        <button 
+                            onClick={() => onNavigate('home')}
+                            className="mb-4 sm:mb-6 px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                        >
+                            🏠 Retour
+                        </button>
+
+                        <div className="card p-4 sm:p-8 slide-enter">
+                            <div className="mb-6 sm:mb-8">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-2xl sm:text-3xl font-bold">
+                                        {steps[currentStep].title}
+                                    </h2>
+                                    <span className="text-base sm:text-lg text-gray-500">
+                                        {currentStep + 1} / {steps.length}
+                                    </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                                    <div 
+                                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 sm:h-3 rounded-full transition-all"
+                                        style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mb-6 sm:mb-8">
+                                {steps[currentStep].content}
+                            </div>
+
+                            <div className="flex gap-3 sm:gap-4">
+                                {currentStep > 0 && (
+                                    <button
+                                        onClick={() => setCurrentStep(prev => prev - 1)}
+                                        className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold text-base sm:text-lg"
+                                    >
+                                        ← Précédent
+                                    </button>
+                                )}
+                                {currentStep < steps.length - 1 ? (
+                                    <button
+                                        onClick={() => setCurrentStep(prev => prev + 1)}
+                                        className="flex-1 btn-primary text-white rounded-xl font-bold text-base sm:text-lg"
+                                    >
+                                        Suivant →
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => onNavigate('home')}
+                                        className="flex-1 btn-primary text-white rounded-xl font-bold text-base sm:text-lg"
+                                    >
+                                        Terminé ✓
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: REFERENCE TABLE
+        // ============================================
+
+        const ReferenceTable = ({ onNavigate }) => {
+            return (
+                <div className="min-h-screen p-4 sm:p-8">
+                    <div className="max-w-5xl mx-auto">
+                        <button 
+                            onClick={() => onNavigate('home')}
+                            className="mb-4 sm:mb-6 px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                        >
+                            🏠 Retour
+                        </button>
+
+                        <div className="card p-4 sm:p-8 slide-enter">
+                            <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-8">
+                                📊 Tableau de Référence
+                            </h1>
+
+                            <div className="space-y-6 sm:space-y-8">
+                                {/* Comparaison principale */}
+                                <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                                    <div className="bg-blue-50 p-4 sm:p-6 rounded-xl">
+                                        <h3 className="text-xl sm:text-2xl font-bold mb-4 color-pc text-center">
+                                            Passé Composé
+                                        </h3>
+                                        <ul className="space-y-2 text-sm sm:text-base">
+                                            <li>✅ Action ponctuelle</li>
+                                            <li>✅ Événement terminé</li>
+                                            <li>✅ Suite d'actions</li>
+                                            <li>✅ Nombre précis</li>
+                                            <li>✅ Durée limitée</li>
+                                        </ul>
+                                        <div className="mt-4 p-3 bg-white rounded-lg">
+                                            <p className="text-sm sm:text-base">
+                                                J'<span className="highlight-pc">ai mangé</span> à 13h.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-orange-50 p-4 sm:p-6 rounded-xl">
+                                        <h3 className="text-xl sm:text-2xl font-bold mb-4 color-imp text-center">
+                                            Imparfait
+                                        </h3>
+                                        <ul className="space-y-2 text-sm sm:text-base">
+                                            <li>✅ Description</li>
+                                            <li>✅ Habitude</li>
+                                            <li>✅ Action en cours</li>
+                                            <li>✅ Contexte</li>
+                                            <li>✅ Durée indéterminée</li>
+                                        </ul>
+                                        <div className="mt-4 p-3 bg-white rounded-lg">
+                                            <p className="text-sm sm:text-base">
+                                                Je <span className="highlight-imp">mangeais</span> quand...
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Combinaisons */}
+                                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 rounded-xl">
+                                    <h3 className="text-xl sm:text-2xl font-bold mb-4 text-center">
+                                        🔀 Combinaisons fréquentes
+                                    </h3>
+                                    <div className="space-y-3 sm:space-y-4">
+                                        <div className="bg-white p-3 sm:p-4 rounded-lg">
+                                            <p className="font-bold mb-2 text-sm sm:text-base">IMP + PC (Action qui interrompt)</p>
+                                            <p className="text-sm sm:text-base">
+                                                Je <span className="highlight-imp">dormais</span> quand le téléphone <span className="highlight-pc">a sonné</span>.
+                                            </p>
+                                        </div>
+                                        <div className="bg-white p-3 sm:p-4 rounded-lg">
+                                            <p className="font-bold mb-2 text-sm sm:text-base">PC + PC (Suite d'actions)</p>
+                                            <p className="text-sm sm:text-base">
+                                                Je <span className="highlight-pc">suis allé</span> au marché puis j'<span className="highlight-pc">ai fait</span> les courses.
+                                            </p>
+                                        </div>
+                                        <div className="bg-white p-3 sm:p-4 rounded-lg">
+                                            <p className="font-bold mb-2 text-sm sm:text-base">IMP + IMP (Deux descriptions)</p>
+                                            <p className="text-sm sm:text-base">
+                                                Il <span className="highlight-imp">faisait</span> beau et les oiseaux <span className="highlight-imp">chantaient</span>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Pièges */}
+                                <div className="bg-red-50 p-4 sm:p-6 rounded-xl border-2 border-red-300">
+                                    <h3 className="text-xl sm:text-2xl font-bold mb-4 text-center text-red-800">
+                                        ⚠️ Pièges courants
+                                    </h3>
+                                    <ul className="space-y-2 text-sm sm:text-base">
+                                        <li>❌ "Hier" peut être avec IMP si c'est une description</li>
+                                        <li>❌ "Toujours" peut être avec PC si c'est une opinion</li>
+                                        <li>❌ Les verbes d'état changent de sens (être, avoir, savoir...)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <p className="text-center text-gray-500 italic mt-6 sm:mt-8 text-sm sm:text-base">
+                                par Benoit Cassagnau
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: QCM EXERCISE
+        // ============================================
+
+        const QCMExercise = ({ exercises, onComplete, title }) => {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [showResult, setShowResult] = useState(false);
+            const [score, setScore] = useState(0);
+            const [answers, setAnswers] = useState({});
+
+            const handleAnswer = (answer) => {
+                if (showResult) return;
+                setSelectedAnswer(answer);
+            };
+
+            const checkAnswer = () => {
+                const isCorrect = selectedAnswer === exercises[currentQuestion].correct;
+                setShowResult(true);
+                setAnswers({
+                    ...answers,
+                    [currentQuestion]: { selected: selectedAnswer, correct: isCorrect }
+                });
+                if (isCorrect) {
+                    setScore(score + 1);
+                }
+            };
+
+            const nextQuestion = () => {
+                if (currentQuestion < exercises.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setSelectedAnswer(null);
+                    setShowResult(false);
+                } else {
+                    onComplete(score + (selectedAnswer === exercises[currentQuestion].correct ? 1 : 0));
+                }
+            };
+
+            const exercise = exercises[currentQuestion];
+
+            return (
+                <div className="space-y-6 sm:space-y-8">
+                    <div className="text-center">
+                        <div className="text-base sm:text-lg text-gray-600 mb-2">
+                            Question {currentQuestion + 1} / {exercises.length}
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                            <div 
+                                className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 sm:h-3 rounded-full transition-all"
+                                style={{ width: `${((currentQuestion + 1) / exercises.length) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 sm:p-6 rounded-xl">
+                        <p className="text-lg sm:text-xl font-semibold leading-relaxed">
+                            {exercise.question}
+                        </p>
+                    </div>
+
+                    <div className="space-y-3 sm:space-y-4">
+                        {exercise.options.map((option, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => handleAnswer(option)}
+                                disabled={showResult}
+                                className={`option-button w-full rounded-xl font-semibold text-left transition-all ${
+                                    showResult
+                                        ? option === exercise.correct
+                                            ? 'bg-green-500 text-white'
+                                            : selectedAnswer === option
+                                            ? 'bg-red-500 text-white'
+                                            : 'bg-gray-200 text-gray-500'
+                                        : selectedAnswer === option
+                                        ? 'bg-purple-500 text-white'
+                                        : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
+
+                    {showResult && (
+                        <div className={`p-4 sm:p-6 rounded-xl ${
+                            selectedAnswer === exercise.correct
+                                ? 'bg-green-50 border-2 border-green-500'
+                                : 'bg-red-50 border-2 border-red-500'
+                        }`}>
+                            <p className="font-bold text-lg sm:text-xl mb-2">
+                                {selectedAnswer === exercise.correct ? '✓ Correct !' : '✗ Incorrect'}
+                            </p>
+                            <p className="text-base sm:text-lg">{exercise.explanation}</p>
+                        </div>
+                    )}
+
+                    {!showResult ? (
+                        <button
+                            onClick={checkAnswer}
+                            disabled={!selectedAnswer}
+                            className="btn-primary w-full text-white rounded-xl font-bold text-lg"
+                        >
+                            Vérifier
+                        </button>
+                    ) : (
+                        <button
+                            onClick={nextQuestion}
+                            className="btn-primary w-full text-white rounded-xl font-bold text-lg"
+                        >
+                            {currentQuestion < exercises.length - 1 ? 'Question suivante →' : 'Terminer'}
+                        </button>
+                    )}
+
+                    <div className="text-center text-base sm:text-lg font-bold">
+                        Score : {score} / {exercises.length}
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: INPUT EXERCISE
+        // ============================================
+
+        const InputExercise = ({ exercises, onComplete, title }) => {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [inputs, setInputs] = useState(['', '']);
+            const [showResult, setShowResult] = useState(false);
+            const [score, setScore] = useState(0);
+
+            const exercise = exercises[currentQuestion];
+            const blanksCount = exercise.sentence.split('_____').length - 1;
+
+            const handleInputChange = (index, value) => {
+                const newInputs = [...inputs];
+                newInputs[index] = value.toLowerCase().trim();
+                setInputs(newInputs);
+            };
+
+            const checkAnswer = () => {
+                const correct = inputs.every((input, idx) => 
+                    exercise.answers[idx].map(a => a.toLowerCase()).includes(input)
+                );
+                if (correct) {
+                    setScore(score + 1);
+                }
+                setShowResult(true);
+            };
+
+            const nextQuestion = () => {
+                if (currentQuestion < exercises.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setInputs(['', '']);
+                    setShowResult(false);
+                } else {
+                    onComplete(score);
+                }
+            };
+
+            const parts = exercise.sentence.split('_____');
+
+            return (
+                <div className="space-y-6 sm:space-y-8">
+                    <div className="text-center">
+                        <div className="text-base sm:text-lg text-gray-600 mb-2">
+                            Exercice {currentQuestion + 1} / {exercises.length}
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                            <div 
+                                className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 sm:h-3 rounded-full transition-all"
+                                style={{ width: `${((currentQuestion + 1) / exercises.length) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 sm:p-6 rounded-xl">
+                        <p className="text-base sm:text-lg leading-relaxed">
+                            {parts.map((part, idx) => (
+                                <span key={idx}>
+                                    {part}
+                                    {idx < parts.length - 1 && (
+                                        <input
+                                            type="text"
+                                            value={inputs[idx]}
+                                            onChange={(e) => handleInputChange(idx, e.target.value)}
+                                            disabled={showResult}
+                                            className={`inline-block mx-2 px-3 py-2 border-2 rounded-lg text-center w-32 sm:w-40 ${
+                                                showResult
+                                                    ? exercise.answers[idx].map(a => a.toLowerCase()).includes(inputs[idx])
+                                                        ? 'border-green-500 bg-green-50'
+                                                        : 'border-red-500 bg-red-50'
+                                                    : 'border-gray-300'
+                                            }`}
+                                            placeholder="..."
+                                        />
+                                    )}
+                                </span>
+                            ))}
+                        </p>
+                    </div>
+
+                    {showResult && (
+                        <div className="bg-blue-50 p-4 sm:p-6 rounded-xl border-2 border-blue-300">
+                            <p className="font-bold text-lg sm:text-xl mb-2">Réponses correctes :</p>
+                            <p className="text-base sm:text-lg mb-3">
+                                {parts.map((part, idx) => (
+                                    <span key={idx}>
+                                        {part}
+                                        {idx < parts.length - 1 && (
+                                            <span className="font-bold text-blue-600">
+                                                {exercise.answers[idx].join(' ou ')}
+                                            </span>
+                                        )}
+                                    </span>
+                                ))}
+                            </p>
+                            <p className="text-base sm:text-lg text-gray-700">{exercise.explanation}</p>
+                        </div>
+                    )}
+
+                    {!showResult ? (
+                        <button
+                            onClick={checkAnswer}
+                            disabled={inputs.some(input => !input)}
+                            className="btn-primary w-full text-white rounded-xl font-bold text-lg"
+                        >
+                            Vérifier
+                        </button>
+                    ) : (
+                        <button
+                            onClick={nextQuestion}
+                            className="btn-primary w-full text-white rounded-xl font-bold text-lg"
+                        >
+                            {currentQuestion < exercises.length - 1 ? 'Exercice suivant →' : 'Terminer'}
+                        </button>
+                    )}
+
+                    <div className="text-center text-base sm:text-lg font-bold">
+                        Score : {score} / {exercises.length}
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT: PRACTICE SCREEN
+        // ============================================
+
+        const PracticeScreen = ({ onNavigate }) => {
+            const [completedSeries, setCompletedSeries] = useState([]);
+            const [currentSeries, setCurrentSeries] = useState(null);
+            const [totalScore, setTotalScore] = useState(0);
+            const [showFinalModal, setShowFinalModal] = useState(false);
+
+            const practiceSeries = [
+                { id: 'A', title: 'Série A : Reconnaissance (QCM)', type: 'qcm', exercises: QCM_EXERCISES_1 },
+                { id: 'B', title: 'Série B : Conjugaison', type: 'input', exercises: INPUT_EXERCISES_2 }
+            ];
+
+            const handleSeriesComplete = (score) => {
+                setCompletedSeries([...completedSeries, currentSeries.id]);
+                setTotalScore(totalScore + score);
+                setCurrentSeries(null);
+
+                if (completedSeries.length + 1 === practiceSeries.length) {
+                    setTimeout(() => setShowFinalModal(true), 500);
+                }
+            };
+
+            if (currentSeries) {
+                return (
+                    <div className="min-h-screen p-4 sm:p-8">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                                <button
+                                    onClick={() => setCurrentSeries(null)}
+                                    className="px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                                >
+                                    ← Retour
+                                </button>
+                                <div className="text-white font-bold text-lg">
+                                    Score total : {totalScore}
+                                </div>
+                            </div>
+
+                            <div className="card p-4 sm:p-8 slide-enter">
+                                <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">
+                                    {currentSeries.title}
+                                </h2>
+                                {currentSeries.type === 'qcm' && (
+                                    <QCMExercise
+                                        exercises={currentSeries.exercises}
+                                        onComplete={handleSeriesComplete}
+                                        title={currentSeries.title}
+                                    />
+                                )}
+                                {currentSeries.type === 'input' && (
+                                    <InputExercise
+                                        exercises={currentSeries.exercises}
+                                        onComplete={handleSeriesComplete}
+                                        title={currentSeries.title}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen p-4 sm:p-8">
+                    <div className="max-w-4xl mx-auto">
+                        <button
+                            onClick={() => onNavigate('home')}
+                            className="mb-4 sm:mb-6 px-4 py-2 bg-white rounded-lg font-semibold hover:bg-gray-100"
+                        >
+                            🏠 Retour
+                        </button>
+
+                        <div className="card p-4 sm:p-8 slide-enter">
+                            <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-8">
+                                💪 Un peu de pratique
+                            </h1>
+                            <p className="text-center text-gray-600 mb-6 sm:mb-8 text-base sm:text-lg">
+                                Choisis une série d'exercices !
+                            </p>
+
+                            <div className="space-y-4 sm:space-y-6">
+                                {practiceSeries.map(series => (
+                                    <div
+                                        key={series.id}
+                                        className={`p-4 sm:p-6 rounded-lg border-2 transition-all ${
+                                            completedSeries.includes(series.id)
+                                                ? 'bg-green-50 border-green-500'
+                                                : 'bg-gray-50 border-gray-300 hover:border-purple-500'
+                                        }`}
+                                    >
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                            <div className="flex-1">
+                                                <h3 className="text-lg sm:text-xl font-bold mb-2">
+                                                    {series.title}
+                                                </h3>
+                                                {completedSeries.includes(series.id) && (
+                                                    <span className="text-green-600 font-semibold">
+                                                        ✅ Complétée
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <button
+                                                onClick={() => setCurrentSeries(series)}
+                                                className={`w-full sm:w-auto px-6 py-3 rounded-lg font-bold ${
+                                                    completedSeries.includes(series.id)
+                                                        ? 'bg-gray-300 hover:bg-gray-400'
+                                                        : 'btn-primary text-white'
+                                                }`}
+                                            >
+                                                {completedSeries.includes(series.id) ? 'Refaire' : 'Commencer'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {completedSeries.length > 0 && (
+                                <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg text-center">
+                                    <div className="text-2xl sm:text-3xl font-bold">
+                                        Score total : {totalScore}
+                                    </div>
+                                    <div className="text-gray-600 mt-2 text-sm sm:text-base">
+                                        {completedSeries.length} / {practiceSeries.length} séries complétées
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {showFinalModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="card p-6 sm:p-12 max-w-2xl text-center slide-enter">
+                                <div className="dancing-person mb-4 sm:mb-6">🕺</div>
+                                <h2 className="text-3xl sm:text-4xl font-bold mb-4">C'est bien !</h2>
+                                <p className="text-xl sm:text-2xl mb-4 sm:mb-6">
+                                    Tu as fini ce module !
+                                </p>
+                                
+                                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 sm:p-8 rounded-xl mb-4 sm:mb-6">
+                                    <div className="text-4xl sm:text-5xl font-bold mb-2">{totalScore}</div>
+                                    <div className="text-lg sm:text-xl">Score total</div>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        setShowFinalModal(false);
+                                        onNavigate('home');
+                                    }}
+                                    className="btn-primary text-white px-8 sm:px-12 py-3 sm:py-4 rounded-xl font-bold text-lg sm:text-xl"
+                                >
+                                    Retour au menu
+                                </button>
+                                
+                                <p className="text-center text-gray-500 italic mt-6 text-sm sm:text-base">
+                                    par Benoit Cassagnau
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================
+        // COMPOSANT PRINCIPAL: APP
+        // ============================================
+
+        const App = () => {
+            const [currentScreen, setCurrentScreen] = useState('home');
+
+            return (
+                <div>
+                    {currentScreen === 'home' && <HomeScreen onNavigate={setCurrentScreen} />}
+                    {currentScreen === 'tutorial' && <TutorialScreen onNavigate={setCurrentScreen} />}
+                    {currentScreen === 'reference' && <ReferenceTable onNavigate={setCurrentScreen} />}
+                    {currentScreen === 'practice' && <PracticeScreen onNavigate={setCurrentScreen} />}
+                </div>
+            );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
